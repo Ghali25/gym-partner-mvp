@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GYM PARTNER</title>
+  <script>const _t=localStorage.getItem('gympartner-theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');</script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -192,6 +193,84 @@
       letter-spacing: 1px;
     }
 
+    /* Camera angle selector */
+    .cam-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .cam-btn {
+      background: #111;
+      border: 1.5px solid #1e1e1e;
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .cam-btn:hover:not(:disabled) { border-color: #333; }
+    .cam-btn.active { border-color: var(--orange); background: rgba(255,92,26,0.06); }
+    .cam-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .cam-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .cam-icon { font-size: 16px; }
+
+    .cam-name {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cam-btn.active .cam-name { color: var(--orange); }
+
+    .soon-tag {
+      font-size: 8px;
+      background: #222;
+      color: #444;
+      padding: 1px 6px;
+      border-radius: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .cam-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .cam-features li {
+      font-size: 11px;
+      color: #444;
+      padding-left: 14px;
+      position: relative;
+      line-height: 1.4;
+    }
+
+    .cam-features li::before {
+      content: '·';
+      position: absolute;
+      left: 4px;
+      color: #333;
+    }
+
+    .cam-btn.active .cam-features li { color: #666; }
+    .cam-btn.active .cam-features li::before { color: var(--orange); }
+
     /* Exercise selector */
     .exercise-grid {
       display: grid;
@@ -288,10 +367,12 @@
 
     .score-header {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       justify-content: space-between;
       margin-bottom: 20px;
     }
+
+    .body-diagram { flex-shrink: 0; }
 
     .score-number {
       font-family: 'Bebas Neue', sans-serif;
@@ -388,11 +469,74 @@
     .reco-item.avertissement .reco-badge { background: rgba(255, 92, 26, 0.15); color: var(--orange); }
     .reco-item.conseil .reco-badge      { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
 
+    .reco-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .reco-partie {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
     .reco-text {
       font-size: 13px;
       line-height: 1.6;
       color: #ccc;
     }
+
+    .reco-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .reco-detail {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .reco-detail-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding-top: 2px;
+    }
+
+    .reco-detail-label.risque     { color: #663a3a; }
+    .reco-detail-label.correction { color: #3a5a3a; }
+
+    .reco-detail-text {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* Section historique */
+    .history-section { padding: 48px 40px; border-top: 1px solid #1c1c1c; }
+    .history-list { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; min-height: 120px; align-items: flex-start; }
+    .history-card { min-width: 130px; background: #111; border: 1px solid #1c1c1c; border-radius: 10px; padding: 14px 12px; flex-shrink: 0; cursor: default; transition: border-color .2s; }
+    .history-card:hover { border-color: #333; }
+    .history-score { font-size: 30px; font-family: 'Bebas Neue', sans-serif; line-height: 1; }
+    .history-exo { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin: 2px 0 8px; }
+    .history-date { font-size: 10px; color: #444; margin-bottom: 8px; }
+    .history-tags { display: flex; flex-direction: column; gap: 3px; }
+    .h-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; width: fit-content; }
+    .h-tag.critique { background: rgba(244,67,54,0.15); color: #f44336; }
+    .h-tag.avert { background: rgba(255,92,26,0.15); color: #ff5c1a; }
+    .h-tag.conseil { background: rgba(76,175,80,0.15); color: #4caf50; }
+    .history-empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
 
     /* Footer tips */
     .tips {
@@ -407,6 +551,70 @@
     .tip-text { font-size: 12px; color: #666; line-height: 1.6; }
     .tip-text strong { color: #aaa; display: block; margin-bottom: 3px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
 
+    /* ── Theme Toggle ── */
+    .theme-toggle {
+      background: none;
+      border: 1px solid #2a2a2a;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1;
+      transition: border-color 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--orange); }
+
+    /* ── Light Mode ── */
+    html[data-theme="light"] {
+      --black: #f8f6f1;
+      --white: #1a1a1a;
+      --gray:  #ede9e1;
+      --muted: #888;
+    }
+    html[data-theme="light"] header                { border-color: #ddd9d2; }
+    html[data-theme="light"] .badge                { border-color: #ddd9d2; }
+    html[data-theme="light"] .theme-toggle         { border-color: #ddd9d2; }
+    html[data-theme="light"] .hero p               { color: #777; }
+    html[data-theme="light"] .main                 { background: #ddd9d2; }
+    html[data-theme="light"] .cam-btn              { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .cam-btn:hover:not(:disabled) { border-color: #bbb; }
+    html[data-theme="light"] .cam-name             { color: #555; }
+    html[data-theme="light"] .cam-features li      { color: #999; }
+    html[data-theme="light"] .cam-features li::before { color: #ccc; }
+    html[data-theme="light"] .cam-btn.active .cam-features li { color: #777; }
+    html[data-theme="light"] .soon-tag             { background: #eee; color: #aaa; }
+    html[data-theme="light"] .exercise-btn         { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .exercise-btn:hover   { border-color: #bbb; }
+    html[data-theme="light"] .exercise-btn .name   { color: #666; }
+    html[data-theme="light"] .dropzone             { border-color: #c8c4bc; }
+    html[data-theme="light"] .dropzone-icon        { background: #ece8e0; }
+    html[data-theme="light"] .video-preview,
+    html[data-theme="light"] .video-info           { background: #f0ece4; }
+    html[data-theme="light"] .video-info span      { color: #777; }
+    html[data-theme="light"] .results-empty        { color: #ccc; }
+    html[data-theme="light"] .results-empty svg    { stroke: #ccc; }
+    html[data-theme="light"] .score-card           { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .score-bar-bg         { background: #ddd9d2; }
+    html[data-theme="light"] .angle-card           { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .angle-value          { color: #1a1a1a; }
+    html[data-theme="light"] .reco-item            { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .reco-text            { color: #333; }
+    html[data-theme="light"] .reco-details         { border-color: #e0dbd4; }
+    html[data-theme="light"] .reco-detail-text     { color: #666; }
+    html[data-theme="light"] .reco-detail-label.risque     { color: #c0392b; }
+    html[data-theme="light"] .reco-detail-label.correction { color: #27ae60; }
+    html[data-theme="light"] .tip-text             { color: #555; }
+    html[data-theme="light"] .tip-text strong      { color: #333; }
+    html[data-theme="light"] .history-section      { border-color: #ddd9d2; }
+    html[data-theme="light"] .history-card         { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .history-card:hover   { border-color: #bbb; }
+    html[data-theme="light"] .history-date         { color: #aaa; }
+    html[data-theme="light"] .history-empty        { color: #aaa; }
+    /* SVG body diagram */
+    html[data-theme="light"] .body-diagram rect,
+    html[data-theme="light"] .body-diagram ellipse,
+    html[data-theme="light"] .body-diagram circle  { fill: #e4e0d8; stroke: #c4c0b8; }
+
     /* Responsive */
     @media (max-width: 768px) {
       .main { grid-template-columns: 1fr; }
@@ -420,7 +628,10 @@
 
   <header>
     <div class="logo">GYM<span>.</span>PARTNER</div>
-    <div class="badge">MVP · Squat Analyser</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="badge">MVP · Squat Analyser</div>
+      <button class="theme-toggle" id="themeToggle">☀</button>
+    </div>
   </header>
 
   <div class="hero">
@@ -432,8 +643,40 @@
 
     <!-- LEFT: Upload -->
     <div class="upload-zone">
+
       <div>
-        <div class="section-label">01 — Exercice</div>
+        <div class="section-label">01 — Angle de caméra</div>
+        <div class="cam-selector">
+          <button class="cam-btn active" data-cam="profil">
+            <div class="cam-header">
+              <span class="cam-icon">📐</span>
+              <span class="cam-name">Profil</span>
+            </div>
+            <ul class="cam-features">
+              <li>Profondeur du squat</li>
+              <li>Position du dos</li>
+              <li>Ouverture des hanches</li>
+              <li>Butt wink (rétroversion du bassin)</li>
+              <li>Hip shoot-up (hanches avant le torse)</li>
+            </ul>
+          </button>
+          <button class="cam-btn" disabled data-cam="face">
+            <div class="cam-header">
+              <span class="cam-icon">👁</span>
+              <span class="cam-name">Face <span class="soon-tag">Bientôt</span></span>
+            </div>
+            <ul class="cam-features">
+              <li>Knee valgus (genoux qui s'effondrent)</li>
+              <li>Asymétrie gauche / droite</li>
+              <li>Écart des pieds</li>
+              <li>Charge déséquilibrée</li>
+            </ul>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">02 — Exercice</div>
         <div class="exercise-grid">
           <button class="exercise-btn active" data-ex="squat">
             <span class="icon">🦵</span>
@@ -443,7 +686,7 @@
             <span class="icon">🏋️</span>
             <span class="name">Deadlift</span>
           </button>
-          <button class="exercise-btn soon" disabled>
+          <button class="exercise-btn" data-ex="bench">
             <span class="icon">💪</span>
             <span class="name">Bench</span>
           </button>
@@ -451,7 +694,7 @@
       </div>
 
       <div>
-        <div class="section-label">02 — Vidéo</div>
+        <div class="section-label">03 — Vidéo</div>
         <div class="dropzone" id="dropzone">
           <input type="file" id="videoInput" accept="video/*" />
           <div class="dropzone-icon">
@@ -478,7 +721,7 @@
 
     <!-- RIGHT: Results -->
     <div class="results-zone">
-      <div class="section-label">03 — Résultats</div>
+      <div class="section-label">04 — Résultats</div>
 
       <div class="results-empty" id="emptyState">
         <svg viewBox="0 0 24 24" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
@@ -490,9 +733,38 @@
         <div class="score-header">
           <div>
             <div class="section-label">Score global</div>
-            <div class="score-number" id="scoreNumber">—</div>
+            <div style="display:flex; align-items:baseline; gap:8px;">
+              <div class="score-number" id="scoreNumber">—</div>
+              <div class="score-label">/ 100</div>
+            </div>
           </div>
-          <div class="score-label">/ 100</div>
+          <!-- Schéma corporel -->
+          <svg class="body-diagram" viewBox="0 0 100 210" width="120" height="252">
+            <!-- Tête -->
+            <circle cx="50" cy="14" r="11" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1.5"/>
+            <!-- Dos / Torse -->
+            <rect id="body-dos" x="30" y="28" width="40" height="52" rx="6" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1.5"/>
+            <!-- Bras gauche : épaule (haut) + coude (bas) -->
+            <rect id="body-epaule-g" x="13" y="30" width="14" height="20" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <rect id="body-coude-g"  x="13" y="50" width="14" height="18" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Bras droit : épaule (haut) + coude (bas) -->
+            <rect id="body-epaule-d" x="73" y="30" width="14" height="20" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <rect id="body-coude-d"  x="73" y="50" width="14" height="18" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Hanches -->
+            <rect id="body-hanche" x="26" y="80" width="48" height="22" rx="6" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1.5"/>
+            <!-- Cuisse gauche -->
+            <rect x="28" y="102" width="18" height="42" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Cuisse droite -->
+            <rect x="54" y="102" width="18" height="42" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Genou gauche -->
+            <ellipse id="body-genou-g" cx="37" cy="147" rx="12" ry="9" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1.5"/>
+            <!-- Genou droit -->
+            <ellipse id="body-genou-d" cx="63" cy="147" rx="12" ry="9" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1.5"/>
+            <!-- Tibia gauche -->
+            <rect x="28" y="156" width="18" height="44" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Tibia droit -->
+            <rect x="54" y="156" width="18" height="44" rx="5" fill="#1c1c1c" stroke="#2a2a2a" stroke-width="1"/>
+          </svg>
         </div>
         <div class="score-bar-bg">
           <div class="score-bar-fill" id="scoreBar"></div>
@@ -548,7 +820,30 @@
     </div>
   </div>
 
+  <div class="history-section">
+    <div class="section-label" style="padding: 0 0 16px">05 — Historique</div>
+    <div class="history-list" id="historyList">
+      <p class="history-empty">Chargement…</p>
+    </div>
+  </div>
+
   <script>
+    // ── Theme ──────────────────────────────────────
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    function updateThemeIcon() {
+      themeToggle.textContent = html.getAttribute('data-theme') === 'light' ? '🌙' : '☀';
+    }
+    updateThemeIcon();
+
+    themeToggle.addEventListener('click', () => {
+      const isLight = html.getAttribute('data-theme') === 'light';
+      html.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      localStorage.setItem('gympartner-theme', isLight ? 'dark' : 'light');
+      updateThemeIcon();
+    });
+
     // ── State ──────────────────────────────────────
     let videoFile = null;
     let selectedExercise = 'squat';
@@ -622,8 +917,9 @@
         // Envoyer la vidéo au serveur Flask
         const formData = new FormData();
         formData.append('video', videoFile);
+        formData.append('exercise', selectedExercise);
 
-        const response = await fetch('http://127.0.0.1:5000/analyze', {
+        const response = await fetch('/analyze', {
           method: 'POST',
           body: formData
         });
@@ -635,7 +931,26 @@
 
         const result = await response.json();
 
-        if (result.error) throw new Error(result.error);
+        if (result.error) {
+          spinner.style.display = 'none';
+          btnText.textContent = 'ANALYSER';
+          analyzeBtn.disabled = false;
+          emptyState.style.display = 'flex';
+
+          if (result.error_type === 'mismatch') {
+            emptyState.innerHTML = `
+              <svg viewBox="0 0 24 24" stroke-width="1.5" style="width:36px;height:36px;stroke:#ff9800;fill:none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <p style="color:#ff9800;font-weight:600;margin:8px 0 4px">Exercice non reconnu</p>
+              <p style="color:#888;font-size:12px;text-align:center;max-width:300px;line-height:1.5">${result.error}</p>
+            `;
+          } else {
+            emptyState.innerHTML = `
+              <svg viewBox="0 0 24 24" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              <p style="color:#f44336">Erreur : ${result.error}<br/><span style="color:#555;font-size:11px">Vérifie que le serveur tourne sur localhost:5000</span></p>
+            `;
+          }
+          return;
+        }
 
         displayResults(result);
 
@@ -665,17 +980,29 @@
         document.getElementById('scoreBar').style.width = data.score + '%';
       }, 100);
 
-      // Angles
-      const angles = [
-        { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', v: data.angles.genou, min: 70, max: 100 },
-        { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  v: data.angles.hanche, min: 55, max: 100 },
-        { card: 'angleBack', val: 'backVal', status: 'backStatus', v: data.angles.dos, min: 0, max: 35 },
-      ];
+      // Angles — config par exercice
+      const ANGLE_CONFIG = {
+        squat: [
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Genou',  key: 'genou',  min: 70, max: 100 },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Hanche', key: 'hanche', min: 55, max: 110 },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',    key: 'dos',    min: 0,  max: 35  },
+        ],
+        bench: [
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Coude',  key: 'coude',  min: 70, max: 95 },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Épaule', key: 'epaule', min: 45, max: 75 },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',    key: 'dos',    min: 0,  max: 35 },
+        ],
+      };
+      const exercise = data.exercise || 'squat';
+      const angles = ANGLE_CONFIG[exercise] || ANGLE_CONFIG.squat;
 
-      angles.forEach(({ card, val, status, v, min, max }, i) => {
+      angles.forEach(({ card, val, status, label, key, min, max }, i) => {
         setTimeout(() => {
           const el = document.getElementById(card);
           el.style.display = 'block';
+          const nameEl = el.querySelector('.angle-name');
+          if (nameEl) nameEl.textContent = label;
+          const v = data.angles[key];
           document.getElementById(val).textContent = v + '°';
           const s = document.getElementById(status);
           if (v >= min && v <= max) { s.textContent = '● Bon'; s.className = 'angle-status ok'; }
@@ -684,30 +1011,175 @@
         }, i * 120);
       });
 
+      // Schéma corporel
+      updateBodyDiagram(data.angles, exercise);
+
       // Recommandations
       const list = document.getElementById('recoList');
       list.innerHTML = '';
       list.style.display = 'flex';
 
-      const badgeLabels = { critique: 'Critique', avertissement: 'À corriger', conseil: 'Conseil' };
+      const badgeLabels  = { critique: 'Critique', avertissement: 'À corriger', conseil: 'Conseil' };
+      const partieLabels = { genou: 'Genou', hanche: 'Hanche', dos: 'Dos', global: 'Global', coude: 'Coude', epaule: 'Épaule' };
+      const zoneColors   = {
+        ok:   { color: '#4caf50', bg: 'rgba(76,175,80,0.12)'  },
+        warn: { color: '#ff5c1a', bg: 'rgba(255,92,26,0.12)'  },
+        bad:  { color: '#f44336', bg: 'rgba(244,67,54,0.12)'  },
+      };
+      const partieRanges = { dos: [0, 35], hanche: [55, 110], genou: [70, 100], coude: [70, 95], epaule: [45, 75] };
+
+      function getZoneStyle(partie) {
+        const r = partieRanges[partie];
+        if (!r) return zoneColors.ok;
+        const v = data.angles[partie];
+        if (v === undefined) return zoneColors.ok;
+        if (v >= r[0] && v <= r[1]) return zoneColors.ok;
+        if (v < r[0] * 0.85 || v > r[1] * 1.15) return zoneColors.bad;
+        return zoneColors.warn;
+      }
 
       data.recommandations.forEach((reco, i) => {
         const item = document.createElement('div');
         item.className = `reco-item ${reco.niveau}`;
 
+        const header = document.createElement('div');
+        header.className = 'reco-header';
+
         const badge = document.createElement('span');
         badge.className = 'reco-badge';
         badge.textContent = badgeLabels[reco.niveau] || reco.niveau;
+
+        const partieEl = document.createElement('span');
+        partieEl.className = 'reco-partie';
+        partieEl.textContent = partieLabels[reco.partie] || reco.partie;
+        const zs = getZoneStyle(reco.partie);
+        partieEl.style.color = zs.color;
+        partieEl.style.background = zs.bg;
+
+        header.appendChild(badge);
+        header.appendChild(partieEl);
 
         const text = document.createElement('span');
         text.className = 'reco-text';
         text.textContent = reco.message;
 
-        item.appendChild(badge);
+        item.appendChild(header);
         item.appendChild(text);
+
+        if (reco.risque || reco.correction) {
+          const details = document.createElement('div');
+          details.className = 'reco-details';
+
+          if (reco.risque) {
+            const d = document.createElement('div');
+            d.className = 'reco-detail';
+            d.innerHTML = `<span class="reco-detail-label risque">Risque</span><span class="reco-detail-text">${reco.risque}</span>`;
+            details.appendChild(d);
+          }
+          if (reco.correction) {
+            const d = document.createElement('div');
+            d.className = 'reco-detail';
+            d.innerHTML = `<span class="reco-detail-label correction">Correction</span><span class="reco-detail-text">${reco.correction}</span>`;
+            details.appendChild(d);
+          }
+          item.appendChild(details);
+        }
+
+        item.addEventListener('mouseenter', () => highlightZone(reco.partie, true));
+        item.addEventListener('mouseleave', () => highlightZone(reco.partie, false));
+
         list.appendChild(item);
         setTimeout(() => item.classList.add('visible'), 600 + i * 150);
       });
+
+      // Rafraîchir l'historique après chaque analyse
+      loadHistory();
+    }
+
+    // ── Historique Airtable ────────────────────────
+    async function loadHistory() {
+      const list = document.getElementById('historyList');
+      try {
+        const res = await fetch('/history');
+        const records = await res.json();
+        if (!Array.isArray(records) || !records.length) {
+          list.innerHTML = '<p class="history-empty">Aucune analyse enregistrée</p>';
+          return;
+        }
+        const ICONS = { squat: '🦵', bench: '💪' };
+        list.innerHTML = records.map(r => {
+          const exo   = (r.Exercice || 'squat').toLowerCase();
+          const icon  = ICONS[exo] || '🏋️';
+          const score = r.Score ?? '—';
+          const color = score >= 80 ? '#4caf50' : score >= 60 ? '#ff9800' : '#f44336';
+          const date  = r.Date
+            ? new Date(r.Date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+            : '—';
+          const tags = [
+            r.Critiques      > 0 ? `<span class="h-tag critique">${r.Critiques} critique${r.Critiques > 1 ? 's' : ''}</span>` : '',
+            r.Avertissements > 0 ? `<span class="h-tag avert">${r.Avertissements} à corriger</span>` : '',
+            r.Conseils       > 0 ? `<span class="h-tag conseil">${r.Conseils} conseil${r.Conseils > 1 ? 's' : ''}</span>` : '',
+          ].filter(Boolean).join('');
+          return `
+            <div class="history-card">
+              <div style="font-size:20px;margin-bottom:4px">${icon}</div>
+              <div class="history-score" style="color:${color}">${score}</div>
+              <div class="history-exo">${exo}</div>
+              <div class="history-date">${date}</div>
+              <div class="history-tags">${tags}</div>
+            </div>`;
+        }).join('');
+      } catch {
+        list.innerHTML = '<p class="history-empty">Historique indisponible</p>';
+      }
+    }
+
+    // Charger l'historique au démarrage
+    loadHistory();
+
+
+    function highlightZone(partie, on) {
+      const zoneMap = {
+        // squat
+        dos:    ['body-dos'],
+        hanche: ['body-hanche'],
+        genou:  ['body-genou-g', 'body-genou-d'],
+        // bench
+        epaule: ['body-epaule-g', 'body-epaule-d'],
+        coude:  ['body-coude-g',  'body-coude-d'],
+      };
+      (zoneMap[partie] || []).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.filter = on ? 'brightness(2.2)' : '';
+      });
+    }
+
+    function updateBodyDiagram(angles, exercise) {
+      const colors = {
+        ok:   { fill: 'rgba(76,175,80,0.15)',  stroke: '#4caf50' },
+        warn: { fill: 'rgba(255,92,26,0.15)',  stroke: '#ff5c1a' },
+        bad:  { fill: 'rgba(244,67,54,0.18)',  stroke: '#f44336' },
+      };
+      function getStatus(v, min, max) {
+        if (v >= min && v <= max) return 'ok';
+        if (v < min * 0.85 || v > max * 1.15) return 'bad';
+        return 'warn';
+      }
+      function applyColor(ids, s) {
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.style.fill = colors[s].fill; el.style.stroke = colors[s].stroke; }
+        });
+      }
+      if (exercise === 'bench') {
+        applyColor(['body-epaule-g', 'body-epaule-d'], getStatus(angles.epaule, 45, 75));
+        applyColor(['body-coude-g',  'body-coude-d'],  getStatus(angles.coude,  70, 95));
+        applyColor(['body-dos'],                        getStatus(angles.dos,    0,  35));
+      } else {
+        applyColor(['body-dos'],                       getStatus(angles.dos,    0,  35));
+        applyColor(['body-hanche'],                    getStatus(angles.hanche, 55, 110));
+        applyColor(['body-genou-g', 'body-genou-d'],   getStatus(angles.genou,  70, 100));
+      }
     }
 
     function hideResults() {
@@ -717,6 +1189,14 @@
         document.getElementById(id).style.display = 'none';
       });
       document.getElementById('scoreBar').style.width = '0%';
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const svgFill   = isLight ? '#e4e0d8' : '#1c1c1c';
+      const svgStroke = isLight ? '#c4c0b8' : '#2a2a2a';
+      ['body-dos', 'body-hanche', 'body-genou-g', 'body-genou-d',
+       'body-epaule-g', 'body-epaule-d', 'body-coude-g', 'body-coude-d'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.fill = svgFill; el.style.stroke = svgStroke; }
+      });
     }
   </script>
 </body>

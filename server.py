@@ -10,10 +10,12 @@ Puis ouvre : http://localhost:5000
 import os
 import json
 import tempfile
+import threading
 from flask import Flask, request, jsonify, send_from_directory
 
 # Import du moteur d'analyse
-from analyze_squat import analyze_video
+from engine import analyze_video
+from airtable import log_analysis, get_history
 
 app = Flask(__name__, static_folder='.')
 
@@ -45,6 +47,8 @@ def analyze():
     if video_file.filename == '':
         return jsonify({'error': 'Fichier vide'}), 400
 
+    exercise = request.form.get('exercise', 'squat')
+
     # Sauvegarder dans un fichier temporaire
     suffix = os.path.splitext(video_file.filename)[1] or '.mp4'
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
@@ -53,7 +57,12 @@ def analyze():
 
     try:
         # Lancer l'analyse
-        result = analyze_video(tmp_path)
+        result = analyze_video(tmp_path, exercise=exercise)
+
+        # Logger dans Airtable (fire-and-forget, ne bloque pas la réponse)
+        if "error" not in result:
+            threading.Thread(target=log_analysis, args=(result,), daemon=True).start()
+
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -63,10 +72,16 @@ def analyze():
             os.remove(tmp_path)
 
 
+# ── Historique des analyses ─────────────────────────
+@app.route('/history', methods=['GET'])
+def history():
+    return jsonify(get_history(limit=10))
+
+
 if __name__ == '__main__':
     print("\n" + "="*45)
     print("  🏋️  GYM PARTNER — Serveur démarré")
     print("="*45)
     print("  → Ouvre : http://localhost:5000")
     print("="*45 + "\n")
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8080, host='0.0.0.0')

@@ -1,11 +1,15 @@
 """
-GYM PARTNER — Analyseur de Squat
-==================================
-Compatible MediaPipe 0.10.13+
+GYM PARTNER — Analyseur de Squat (wrapper de compatibilité)
+=============================================================
+Ce fichier est conservé pour la compatibilité CLI.
+La logique a été déplacée dans engine.py + exercises/squat.py.
 
 Usage :
     python analyze_squat.py --video mon_squat.mp4
+    python engine.py --video mon_squat.mp4 --exercise squat
 """
+# Réexport pour compatibilité
+from engine import analyze_video  # noqa: F401
 
 import cv2
 import numpy as np
@@ -83,9 +87,11 @@ class FrameData:
 
 @dataclass
 class Recommendation:
-    niveau: str   # 'critique' | 'avertissement' | 'conseil'
+    niveau: str      # 'critique' | 'avertissement' | 'conseil'
     message: str
-    partie: str   # 'genou' | 'hanche' | 'dos' | 'global'
+    partie: str      # 'genou' | 'hanche' | 'dos' | 'global'
+    risque: str = ""
+    correction: str = ""
 
 
 SEVERITY_ORDER = {'critique': 0, 'avertissement': 1, 'conseil': 2}
@@ -112,13 +118,17 @@ def evaluate_squat(frames: List[FrameData], bottom_idx: int) -> Tuple[int, List[
     # Profondeur (angle genou)
     if bottom.knee_angle > 110:
         recs.append(Recommendation('critique',
-            "❌ Squat pas assez profond — descends jusqu'à ce que les cuisses soient parallèles au sol",
-            'genou'))
+            "❌ Squat pas assez profond",
+            'genou',
+            risque="Sous-solicitation des quadriceps et fessiers, report de charge sur les lombaires.",
+            correction="Descends jusqu'à ce que les cuisses soient parallèles au sol. Travaille ta mobilité de cheville si tu bloques."))
         score -= 30
     elif bottom.knee_angle < 60:
         recs.append(Recommendation('avertissement',
-            "⚠️ Squat trop profond — remonte légèrement pour préserver les genoux",
-            'genou'))
+            "⚠️ Squat trop profond",
+            'genou',
+            risque="Contrainte excessive sur les ligaments du genou et cisaillement rotulien à hautes charges.",
+            correction="Remonte légèrement pour viser un angle de genou entre 70° et 100°."))
         score -= 10
     else:
         recs.append(Recommendation('conseil', "✅ Bonne profondeur de squat", 'genou'))
@@ -126,13 +136,17 @@ def evaluate_squat(frames: List[FrameData], bottom_idx: int) -> Tuple[int, List[
     # Dos au point bas
     if bottom.back_angle > 50:
         recs.append(Recommendation('critique',
-            "❌ Dos trop penché en avant — garde le torse droit et regarde devant toi",
-            'dos'))
+            "❌ Dos trop penché en avant",
+            'dos',
+            risque="Risque de hernie discale et de douleurs lombaires chroniques, surtout sous charge lourde.",
+            correction="Garde la poitrine haute, regarde un point fixe devant toi. Renforce le gainage du tronc."))
         score -= 25
     elif bottom.back_angle > 35:
         recs.append(Recommendation('avertissement',
-            "⚠️ Légère inclinaison du dos — essaie de garder le buste plus vertical",
-            'dos'))
+            "⚠️ Légère inclinaison du dos",
+            'dos',
+            risque="Fatigue lombaire prématurée qui peut s'accentuer à la fatigue ou avec plus de charge.",
+            correction="Pense à 'sortir la poitrine' en descendant. Inspire profondément avant chaque répétition."))
         score -= 10
     else:
         recs.append(Recommendation('conseil', "✅ Bonne position du dos", 'dos'))
@@ -141,18 +155,24 @@ def evaluate_squat(frames: List[FrameData], bottom_idx: int) -> Tuple[int, List[
     butt_wink = bottom.knee_angle < 85 and bottom.hip_angle < 55
     if butt_wink:
         recs.append(Recommendation('avertissement',
-            "⚠️ Rétroversion du bassin probable en fond de squat (butt wink) — travaille ta mobilité de cheville et de hanche",
-            'hanche'))
+            "⚠️ Rétroversion du bassin en fond de squat (butt wink)",
+            'hanche',
+            risque="Compression discale lombaire en position de flexion maximale, surtout problématique sous charge.",
+            correction="Travaille la mobilité de cheville (élévation sur planche) et de hanche. Essaie un talon légèrement surélevé."))
         score -= 15
     elif bottom.hip_angle < 55:
         recs.append(Recommendation('avertissement',
-            "⚠️ Hanches trop fermées — écarte légèrement les pieds ou travaille ta mobilité",
-            'hanche'))
+            "⚠️ Hanches trop fermées au point bas",
+            'hanche',
+            risque="Compensation par une antéversion du bassin, tension excessive sur les adducteurs.",
+            correction="Écarte légèrement les pieds et oriente les orteils vers l'extérieur (30–45°). Travaille la mobilité de hanche."))
         score -= 15
     elif bottom.hip_angle > 110:
         recs.append(Recommendation('avertissement',
             "⚠️ Hanches trop ouvertes au point bas",
-            'hanche'))
+            'hanche',
+            risque="Instabilité du bassin et tension excessive sur les abducteurs.",
+            correction="Resserre légèrement l'écart des pieds pour retrouver un alignement optimal."))
         score -= 10
 
     # ── B. ANALYSE TEMPORELLE ──────────────────────────────────────
@@ -163,8 +183,10 @@ def evaluate_squat(frames: List[FrameData], bottom_idx: int) -> Tuple[int, List[
         avg_back_early = float(np.mean([f.back_angle for f in early]))
         if avg_back_early - bottom.back_angle > 15:
             recs.append(Recommendation('critique',
-                "❌ Les hanches montent avant le torse à la remontée — pousse avec les jambes et garde le buste relevé",
-                'dos'))
+                "❌ Les hanches montent avant le torse à la remontée",
+                'dos',
+                risque="Cisaillement lombaire brutal sous charge — l'un des patterns les plus dangereux du squat.",
+                correction="Pense 'genoux et hanches remontent en même temps'. Travaille des pause squats pour renforcer le point bas."))
             score -= 20
 
     # B2. Effondrement progressif du torse pendant la descente
@@ -174,8 +196,10 @@ def evaluate_squat(frames: List[FrameData], bottom_idx: int) -> Tuple[int, List[
         last_back  = float(np.mean([f.back_angle for f in descent[-quarter:]]))
         if last_back - first_back > 20:
             recs.append(Recommendation('avertissement',
-                "⚠️ Le torse s'incline progressivement pendant la descente — engage les abdominaux dès le début du mouvement",
-                'dos'))
+                "⚠️ Le torse s'incline progressivement pendant la descente",
+                'dos',
+                risque="Surcharge des érecteurs du rachis et perte de tension qui fragilise le bas du dos.",
+                correction="Inspire et engage les abdominaux avant de commencer la descente (technique Valsalva)."))
             score -= 10
 
     # Trier critique → avertissement → conseil
@@ -289,7 +313,8 @@ def analyze_video(video_path: str) -> dict:
         },
         "score": score,
         "recommandations": [
-            {"niveau": r.niveau, "message": r.message, "partie": r.partie}
+            {"niveau": r.niveau, "message": r.message, "partie": r.partie,
+             "risque": r.risque, "correction": r.correction}
             for r in recs
         ],
     }

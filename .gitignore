@@ -4,3 +4,4 @@ __pycache__/
 pose_landmarker.task
 .DS_Store
 *.tmp
+.env
