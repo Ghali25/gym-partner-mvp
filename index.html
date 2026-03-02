@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GYM PARTNER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f0e8;
+      --orange: #ff5c1a;
+      --gray: #1c1c1c;
+      --muted: #555;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--white);
+    }
+
+    .logo span { color: var(--orange); }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid #2a2a2a;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 80px 48px 60px;
+      max-width: 680px;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 8vw, 88px);
+      line-height: 0.95;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--orange);
+      display: block;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: #888;
+      line-height: 1.7;
+      max-width: 420px;
+    }
+
+    /* ── Main layout ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: #111;
+      margin: 0 0 2px;
+    }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      background: var(--black);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 4px;
+    }
+
+    .dropzone {
+      border: 1.5px dashed #2e2e2e;
+      border-radius: 12px;
+      padding: 52px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.25s, background 0.25s;
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.drag-over {
+      border-color: var(--orange);
+      background: rgba(255, 92, 26, 0.04);
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .dropzone-icon {
+      width: 52px;
+      height: 52px;
+      background: #1a1a1a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .dropzone-icon svg { width: 22px; height: 22px; stroke: var(--orange); fill: none; }
+
+    .dropzone h3 {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .dropzone p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Preview */
+    .video-preview {
+      display: none;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #111;
+      position: relative;
+    }
+
+    .video-preview video {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-info {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #111;
+    }
+
+    .video-info span { font-size: 13px; color: #888; }
+
+    .remove-btn {
+      font-size: 11px;
+      color: var(--orange);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      letter-spacing: 1px;
+    }
+
+    /* Exercise selector */
+    .exercise-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .exercise-btn {
+      background: #111;
+      border: 1.5px solid #1e1e1e;
+      border-radius: 10px;
+      padding: 16px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .exercise-btn:hover { border-color: #333; }
+    .exercise-btn.active { border-color: var(--orange); background: rgba(255,92,26,0.06); }
+
+    .exercise-btn .icon { font-size: 22px; margin-bottom: 8px; display: block; }
+    .exercise-btn .name { font-size: 11px; color: #888; font-weight: 500; letter-spacing: 0.5px; display: block; }
+    .exercise-btn.active .name { color: var(--orange); }
+    .exercise-btn.soon { opacity: 0.35; cursor: not-allowed; }
+
+    /* Analyse button */
+    .analyze-btn {
+      width: 100%;
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 18px;
+      border-radius: 10px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .analyze-btn:hover { opacity: 0.88; }
+    .analyze-btn:active { transform: scale(0.99); }
+    .analyze-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* Loading */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results ── */
+    .results-zone {
+      background: var(--black);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .results-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 16px;
+      color: #2a2a2a;
+    }
+
+    .results-empty svg { width: 48px; height: 48px; stroke: #2a2a2a; fill: none; }
+    .results-empty p { font-size: 13px; }
+
+    /* Score card */
+    .score-card {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 28px;
+      display: none;
+    }
+
+    .score-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .score-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 72px;
+      line-height: 1;
+      color: var(--orange);
+    }
+
+    .score-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+
+    .score-bar-bg {
+      height: 4px;
+      background: #1e1e1e;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 2px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+
+    /* Angles */
+    .angles-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .angle-card {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+      padding: 16px 14px;
+      text-align: center;
+      display: none;
+    }
+
+    .angle-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--white);
+      display: block;
+      line-height: 1;
+    }
+
+    .angle-name { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin: 6px 0 2px; display: block; }
+    .angle-status { font-size: 10px; }
+    .angle-status.ok { color: #4caf50; }
+    .angle-status.warn { color: var(--orange); }
+    .angle-status.bad { color: #f44336; }
+
+    /* Recommendations */
+    .reco-list {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .reco-item {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    .reco-item.visible { opacity: 1; transform: translateY(0); }
+
+    .reco-item.critique     { border-color: rgba(244, 67, 54, 0.35); }
+    .reco-item.avertissement { border-color: rgba(255, 92, 26, 0.35); }
+    .reco-item.conseil      { border-color: rgba(76, 175, 80, 0.25); }
+
+    .reco-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      align-self: flex-start;
+    }
+
+    .reco-item.critique .reco-badge     { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+    .reco-item.avertissement .reco-badge { background: rgba(255, 92, 26, 0.15); color: var(--orange); }
+    .reco-item.conseil .reco-badge      { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+
+    .reco-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    /* Footer tips */
+    .tips {
+      background: var(--gray);
+      padding: 32px 48px;
+      display: flex;
+      gap: 48px;
+    }
+
+    .tip { display: flex; align-items: flex-start; gap: 14px; }
+    .tip-icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+    .tip-text { font-size: 12px; color: #666; line-height: 1.6; }
+    .tip-text strong { color: #aaa; display: block; margin-bottom: 3px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+      header, .hero, .upload-zone, .results-zone { padding: 28px 24px; }
+      .hero { padding-top: 48px; }
+      .tips { flex-direction: column; gap: 24px; padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">GYM<span>.</span>PARTNER</div>
+    <div class="badge">MVP · Squat Analyser</div>
+  </header>
+
+  <div class="hero">
+    <h1>Analyse ton <em>mouvement</em></h1>
+    <p>Upload ta vidéo, notre IA détecte les angles de tes articulations et te donne des recommandations concrètes pour progresser.</p>
+  </div>
+
+  <div class="main">
+
+    <!-- LEFT: Upload -->
+    <div class="upload-zone">
+      <div>
+        <div class="section-label">01 — Exercice</div>
+        <div class="exercise-grid">
+          <button class="exercise-btn active" data-ex="squat">
+            <span class="icon">🦵</span>
+            <span class="name">Squat</span>
+          </button>
+          <button class="exercise-btn soon" disabled>
+            <span class="icon">🏋️</span>
+            <span class="name">Deadlift</span>
+          </button>
+          <button class="exercise-btn soon" disabled>
+            <span class="icon">💪</span>
+            <span class="name">Bench</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">02 — Vidéo</div>
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="videoInput" accept="video/*" />
+          <div class="dropzone-icon">
+            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M15 10l4.553-2.277A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+          </div>
+          <h3>Dépose ta vidéo ici</h3>
+          <p>MP4, MOV — Max 200 Mo<br/>Vue de profil recommandée</p>
+        </div>
+
+        <div class="video-preview" id="videoPreview">
+          <video id="videoPlayer" controls muted></video>
+          <div class="video-info">
+            <span id="videoName">—</span>
+            <button class="remove-btn" id="removeBtn">✕ SUPPRIMER</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">ANALYSER</span>
+      </button>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="results-zone">
+      <div class="section-label">03 — Résultats</div>
+
+      <div class="results-empty" id="emptyState">
+        <svg viewBox="0 0 24 24" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <p>Ton rapport apparaîtra<br/>ici après l'analyse</p>
+      </div>
+
+      <!-- Score -->
+      <div class="score-card" id="scoreCard">
+        <div class="score-header">
+          <div>
+            <div class="section-label">Score global</div>
+            <div class="score-number" id="scoreNumber">—</div>
+          </div>
+          <div class="score-label">/ 100</div>
+        </div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill" id="scoreBar"></div>
+        </div>
+      </div>
+
+      <!-- Angles -->
+      <div class="angles-row">
+        <div class="angle-card" id="angleKnee">
+          <span class="angle-value" id="kneeVal">—</span>
+          <span class="angle-name">Genou</span>
+          <span class="angle-status" id="kneeStatus"></span>
+        </div>
+        <div class="angle-card" id="angleHip">
+          <span class="angle-value" id="hipVal">—</span>
+          <span class="angle-name">Hanche</span>
+          <span class="angle-status" id="hipStatus"></span>
+        </div>
+        <div class="angle-card" id="angleBack">
+          <span class="angle-value" id="backVal">—</span>
+          <span class="angle-name">Dos</span>
+          <span class="angle-status" id="backStatus"></span>
+        </div>
+      </div>
+
+      <!-- Recommandations -->
+      <div class="reco-list" id="recoList"></div>
+    </div>
+
+  </div>
+
+  <div class="tips">
+    <div class="tip">
+      <div class="tip-icon">📱</div>
+      <div class="tip-text">
+        <strong>Angle de caméra</strong>
+        Filme-toi de profil (vue latérale) pour que l'IA puisse détecter les angles correctement.
+      </div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-text">
+        <strong>Luminosité</strong>
+        Assure-toi que tu es bien éclairé et que ton corps entier est visible dans le cadre.
+      </div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">🔁</div>
+      <div class="tip-text">
+        <strong>Répétitions</strong>
+        Filme entre 3 et 5 répétitions complètes pour une analyse plus précise.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── State ──────────────────────────────────────
+    let videoFile = null;
+    let selectedExercise = 'squat';
+
+    // ── DOM refs ───────────────────────────────────
+    const dropzone     = document.getElementById('dropzone');
+    const videoInput   = document.getElementById('videoInput');
+    const videoPreview = document.getElementById('videoPreview');
+    const videoPlayer  = document.getElementById('videoPlayer');
+    const videoName    = document.getElementById('videoName');
+    const removeBtn    = document.getElementById('removeBtn');
+    const analyzeBtn   = document.getElementById('analyzeBtn');
+    const btnText      = document.getElementById('btnText');
+    const spinner      = document.getElementById('spinner');
+    const emptyState   = document.getElementById('emptyState');
+
+    // ── Exercise selection ─────────────────────────
+    document.querySelectorAll('.exercise-btn:not(.soon)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.exercise-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedExercise = btn.dataset.ex;
+      });
+    });
+
+    // ── File handling ──────────────────────────────
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('video/')) return;
+      videoFile = file;
+      const url = URL.createObjectURL(file);
+      videoPlayer.src = url;
+      videoName.textContent = file.name;
+      dropzone.style.display = 'none';
+      videoPreview.style.display = 'block';
+      analyzeBtn.disabled = false;
+    }
+
+    videoInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    removeBtn.addEventListener('click', () => {
+      videoFile = null;
+      videoPlayer.src = '';
+      videoPreview.style.display = 'none';
+      dropzone.style.display = 'block';
+      analyzeBtn.disabled = true;
+      videoInput.value = '';
+    });
+
+    // ── Analyse ────────────────────────────────────
+    analyzeBtn.addEventListener('click', runAnalysis);
+
+    async function runAnalysis() {
+      if (!videoFile) return;
+
+      // Loading state
+      analyzeBtn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'ANALYSE EN COURS...';
+      emptyState.style.display = 'none';
+      hideResults();
+
+      try {
+        // Envoyer la vidéo au serveur Flask
+        const formData = new FormData();
+        formData.append('video', videoFile);
+
+        const response = await fetch('http://127.0.0.1:5000/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Erreur serveur');
+        }
+
+        const result = await response.json();
+
+        if (result.error) throw new Error(result.error);
+
+        displayResults(result);
+
+      } catch (err) {
+        spinner.style.display = 'none';
+        btnText.textContent = 'ANALYSER';
+        analyzeBtn.disabled = false;
+        emptyState.style.display = 'flex';
+        emptyState.innerHTML = `
+          <svg viewBox="0 0 24 24" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <p style="color:#f44336">Erreur : ${err.message}<br/><span style="color:#555;font-size:11px">Vérifie que le serveur tourne sur localhost:5000</span></p>
+        `;
+      }
+    }
+
+    function displayResults(data) {
+      // Reset loading
+      spinner.style.display = 'none';
+      btnText.textContent = 'ANALYSER À NOUVEAU';
+      analyzeBtn.disabled = false;
+
+      // Score
+      const scoreCard = document.getElementById('scoreCard');
+      scoreCard.style.display = 'block';
+      document.getElementById('scoreNumber').textContent = data.score;
+      setTimeout(() => {
+        document.getElementById('scoreBar').style.width = data.score + '%';
+      }, 100);
+
+      // Angles
+      const angles = [
+        { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', v: data.angles.genou, min: 70, max: 100 },
+        { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  v: data.angles.hanche, min: 55, max: 100 },
+        { card: 'angleBack', val: 'backVal', status: 'backStatus', v: data.angles.dos, min: 0, max: 35 },
+      ];
+
+      angles.forEach(({ card, val, status, v, min, max }, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(card);
+          el.style.display = 'block';
+          document.getElementById(val).textContent = v + '°';
+          const s = document.getElementById(status);
+          if (v >= min && v <= max) { s.textContent = '● Bon'; s.className = 'angle-status ok'; }
+          else if (v < min * 0.85 || v > max * 1.15) { s.textContent = '● À corriger'; s.className = 'angle-status bad'; }
+          else { s.textContent = '● À surveiller'; s.className = 'angle-status warn'; }
+        }, i * 120);
+      });
+
+      // Recommandations
+      const list = document.getElementById('recoList');
+      list.innerHTML = '';
+      list.style.display = 'flex';
+
+      const badgeLabels = { critique: 'Critique', avertissement: 'À corriger', conseil: 'Conseil' };
+
+      data.recommandations.forEach((reco, i) => {
+        const item = document.createElement('div');
+        item.className = `reco-item ${reco.niveau}`;
+
+        const badge = document.createElement('span');
+        badge.className = 'reco-badge';
+        badge.textContent = badgeLabels[reco.niveau] || reco.niveau;
+
+        const text = document.createElement('span');
+        text.className = 'reco-text';
+        text.textContent = reco.message;
+
+        item.appendChild(badge);
+        item.appendChild(text);
+        list.appendChild(item);
+        setTimeout(() => item.classList.add('visible'), 600 + i * 150);
+      });
+    }
+
+    function hideResults() {
+      document.getElementById('scoreCard').style.display = 'none';
+      document.getElementById('recoList').style.display = 'none';
+      ['angleKnee', 'angleHip', 'angleBack'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById('scoreBar').style.width = '0%';
+    }
+  </script>
+</body>
+</html>

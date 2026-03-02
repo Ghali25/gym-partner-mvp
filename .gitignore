@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+pose_landmarker.task
+.DS_Store
+*.tmp
