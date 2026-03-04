@@ -75,7 +75,7 @@ def analyze():
 # ── Historique des analyses ─────────────────────────
 @app.route('/history', methods=['GET'])
 def history():
-    return jsonify(get_history(limit=10))
+    return jsonify(get_history(limit=50))
 
 
 if __name__ == '__main__':
