@@ -123,7 +123,7 @@ def _extract_raw_frames(video_path: str, stride: int = 3) -> list:
 # 5. POINT D'ENTRÉE PUBLIC
 # ─────────────────────────────────────────
 
-EXERCISES = ('squat', 'bench')
+EXERCISES = ('squat', 'bench', 'squat_face')
 
 def analyze_video(video_path: str, exercise: str = 'squat') -> dict:
     """
@@ -146,6 +146,8 @@ def analyze_video(video_path: str, exercise: str = 'squat') -> dict:
         from exercises.squat import build_frame_data, find_bottom, evaluate, validate
     elif exercise == 'bench':
         from exercises.bench import build_frame_data, find_bottom, evaluate, validate
+    elif exercise == 'squat_face':
+        from exercises.squat_face import build_frame_data, find_bottom, evaluate, validate
 
     options = _build_landmarker_options()
     frames = []
@@ -202,7 +204,7 @@ def analyze_video(video_path: str, exercise: str = 'squat') -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="GYM PARTNER — Moteur d'analyse")
     parser.add_argument("--video",    required=True, help="Chemin vers la vidéo MP4")
-    parser.add_argument("--exercise", default="squat", choices=EXERCISES, help="Exercice à analyser")
+    parser.add_argument("--exercise", default="squat", choices=list(EXERCISES), help="Exercice à analyser")
     parser.add_argument("--json",     action="store_true", help="Sortie JSON brute")
     args = parser.parse_args()
 

@@ -660,10 +660,10 @@
               <li>Hip shoot-up (hanches avant le torse)</li>
             </ul>
           </button>
-          <button class="cam-btn" disabled data-cam="face">
+          <button class="cam-btn" data-cam="face">
             <div class="cam-header">
               <span class="cam-icon">👁</span>
-              <span class="cam-name">Face <span class="soon-tag">Bientôt</span></span>
+              <span class="cam-name">Face</span>
             </div>
             <ul class="cam-features">
               <li>Knee valgus (genoux qui s'effondrent)</li>
@@ -847,6 +847,12 @@
     // ── State ──────────────────────────────────────
     let videoFile = null;
     let selectedExercise = 'squat';
+    let selectedCamera   = 'profil';
+
+    function getEffectiveExercise() {
+      if (selectedExercise === 'squat' && selectedCamera === 'face') return 'squat_face';
+      return selectedExercise;
+    }
 
     // ── DOM refs ───────────────────────────────────
     const dropzone     = document.getElementById('dropzone');
@@ -860,12 +866,36 @@
     const spinner      = document.getElementById('spinner');
     const emptyState   = document.getElementById('emptyState');
 
+    // ── Camera selection ───────────────────────────
+    document.querySelectorAll('.cam-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCamera = btn.dataset.cam;
+      });
+    });
+
     // ── Exercise selection ─────────────────────────
+    const faceCamBtn = document.querySelector('.cam-btn[data-cam="face"]');
+
     document.querySelectorAll('.exercise-btn:not(.soon)').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.exercise-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedExercise = btn.dataset.ex;
+
+        // Vue de face uniquement disponible pour le squat
+        if (selectedExercise !== 'squat') {
+          faceCamBtn.disabled = true;
+          if (selectedCamera === 'face') {
+            selectedCamera = 'profil';
+            document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.cam-btn[data-cam="profil"]').classList.add('active');
+          }
+        } else {
+          faceCamBtn.disabled = false;
+        }
       });
     });
 
@@ -917,7 +947,7 @@
         // Envoyer la vidéo au serveur Flask
         const formData = new FormData();
         formData.append('video', videoFile);
-        formData.append('exercise', selectedExercise);
+        formData.append('exercise', getEffectiveExercise());
 
         const response = await fetch('/analyze', {
           method: 'POST',
@@ -983,14 +1013,19 @@
       // Angles — config par exercice
       const ANGLE_CONFIG = {
         squat: [
-          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Genou',  key: 'genou',  min: 70, max: 100 },
-          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Hanche', key: 'hanche', min: 55, max: 110 },
-          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',    key: 'dos',    min: 0,  max: 35  },
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Genou',    key: 'genou',    min: 70,  max: 100 },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Hanche',   key: 'hanche',   min: 55,  max: 110 },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',      key: 'dos',      min: 0,   max: 35  },
         ],
         bench: [
-          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Coude',  key: 'coude',  min: 70, max: 95 },
-          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Épaule', key: 'epaule', min: 45, max: 75 },
-          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',    key: 'dos',    min: 0,  max: 35 },
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Coude',    key: 'coude',    min: 70,  max: 95  },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Épaule',   key: 'epaule',   min: 45,  max: 75  },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',      key: 'dos',      min: 0,   max: 35  },
+        ],
+        squat_face: [
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Valgus G', key: 'valgus_g', min: 168, max: 180 },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Valgus D', key: 'valgus_d', min: 168, max: 180 },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Asymétrie',key: 'asymetrie',min: 0,   max: 10  },
         ],
       };
       const exercise = data.exercise || 'squat';
@@ -1020,13 +1055,13 @@
       list.style.display = 'flex';
 
       const badgeLabels  = { critique: 'Critique', avertissement: 'À corriger', conseil: 'Conseil' };
-      const partieLabels = { genou: 'Genou', hanche: 'Hanche', dos: 'Dos', global: 'Global', coude: 'Coude', epaule: 'Épaule' };
+      const partieLabels = { genou: 'Genou', hanche: 'Hanche', dos: 'Dos', global: 'Global', coude: 'Coude', epaule: 'Épaule', valgus_g: 'Genou G', valgus_d: 'Genou D', asymetrie: 'Asymétrie' };
       const zoneColors   = {
         ok:   { color: '#4caf50', bg: 'rgba(76,175,80,0.12)'  },
         warn: { color: '#ff5c1a', bg: 'rgba(255,92,26,0.12)'  },
         bad:  { color: '#f44336', bg: 'rgba(244,67,54,0.12)'  },
       };
-      const partieRanges = { dos: [0, 35], hanche: [55, 110], genou: [70, 100], coude: [70, 95], epaule: [45, 75] };
+      const partieRanges = { dos: [0, 35], hanche: [55, 110], genou: [70, 100], coude: [70, 95], epaule: [45, 75], valgus_g: [168, 180], valgus_d: [168, 180], asymetrie: [0, 10] };
 
       function getZoneStyle(partie) {
         const r = partieRanges[partie];
@@ -1140,13 +1175,18 @@
 
     function highlightZone(partie, on) {
       const zoneMap = {
-        // squat
-        dos:    ['body-dos'],
-        hanche: ['body-hanche'],
-        genou:  ['body-genou-g', 'body-genou-d'],
+        // squat profil
+        dos:       ['body-dos'],
+        hanche:    ['body-hanche'],
+        genou:     ['body-genou-g', 'body-genou-d'],
         // bench
-        epaule: ['body-epaule-g', 'body-epaule-d'],
-        coude:  ['body-coude-g',  'body-coude-d'],
+        epaule:    ['body-epaule-g', 'body-epaule-d'],
+        coude:     ['body-coude-g',  'body-coude-d'],
+        // squat face
+        valgus_g:  ['body-genou-g'],
+        valgus_d:  ['body-genou-d'],
+        asymetrie: ['body-genou-g', 'body-genou-d'],
+        global:    ['body-genou-g', 'body-genou-d', 'body-hanche'],
       };
       (zoneMap[partie] || []).forEach(id => {
         const el = document.getElementById(id);
@@ -1172,13 +1212,17 @@
         });
       }
       if (exercise === 'bench') {
-        applyColor(['body-epaule-g', 'body-epaule-d'], getStatus(angles.epaule, 45, 75));
-        applyColor(['body-coude-g',  'body-coude-d'],  getStatus(angles.coude,  70, 95));
-        applyColor(['body-dos'],                        getStatus(angles.dos,    0,  35));
+        applyColor(['body-epaule-g', 'body-epaule-d'], getStatus(angles.epaule,   45,  75));
+        applyColor(['body-coude-g',  'body-coude-d'],  getStatus(angles.coude,    70,  95));
+        applyColor(['body-dos'],                        getStatus(angles.dos,       0,  35));
+      } else if (exercise === 'squat_face') {
+        applyColor(['body-genou-g'],                   getStatus(angles.valgus_g, 168, 180));
+        applyColor(['body-genou-d'],                   getStatus(angles.valgus_d, 168, 180));
+        applyColor(['body-hanche'],                    getStatus(angles.asymetrie,  0,  10));
       } else {
-        applyColor(['body-dos'],                       getStatus(angles.dos,    0,  35));
-        applyColor(['body-hanche'],                    getStatus(angles.hanche, 55, 110));
-        applyColor(['body-genou-g', 'body-genou-d'],   getStatus(angles.genou,  70, 100));
+        applyColor(['body-dos'],                       getStatus(angles.dos,       0,  35));
+        applyColor(['body-hanche'],                    getStatus(angles.hanche,   55, 110));
+        applyColor(['body-genou-g', 'body-genou-d'],   getStatus(angles.genou,    70, 100));
       }
     }
 
