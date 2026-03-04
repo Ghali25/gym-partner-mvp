@@ -113,17 +113,17 @@ def evaluate(frames: List[SquatFrameData], bottom_idx: int) -> Tuple[int, List[R
     # Profondeur (angle genou)
     if bottom.knee_angle > 110:
         recs.append(Recommendation('critique',
-            "❌ Squat pas assez profond",
+            "❌ Tu ne descends pas assez bas",
             'genou',
-            risque="Sous-solicitation des quadriceps et fessiers, report de charge sur les lombaires.",
-            correction="Descends jusqu'à ce que les cuisses soient parallèles au sol. Travaille ta mobilité de cheville si tu bloques."))
+            risque="En restant trop haut, les cuisses et les fesses ne travaillent presque pas.",
+            correction="Descends jusqu'à ce que tes cuisses soient parallèles au sol (comme si tu t'asseyais sur une chaise basse). Si tu bloques, essaie d'écarter un peu les pieds."))
         score -= 30
     elif bottom.knee_angle < 60:
         recs.append(Recommendation('avertissement',
-            "⚠️ Squat trop profond",
+            "⚠️ Tu descends trop bas",
             'genou',
-            risque="Contrainte excessive sur les ligaments du genou et cisaillement rotulien à hautes charges.",
-            correction="Remonte légèrement pour viser un angle de genou entre 70° et 100°."))
+            risque="Aller trop bas peut mettre trop de pression sur les genoux, surtout avec du poids.",
+            correction="Arrête-toi quand tes cuisses sont parallèles au sol. Ce n'est pas nécessaire d'aller plus bas."))
         score -= 10
     else:
         recs.append(Recommendation('conseil', "✅ Bonne profondeur de squat", 'genou'))
@@ -131,43 +131,43 @@ def evaluate(frames: List[SquatFrameData], bottom_idx: int) -> Tuple[int, List[R
     # Dos au point bas
     if bottom.back_angle > 50:
         recs.append(Recommendation('critique',
-            "❌ Dos trop penché en avant",
+            "❌ Ton dos est trop penché en avant",
             'dos',
-            risque="Risque de hernie discale et de douleurs lombaires chroniques, surtout sous charge lourde.",
-            correction="Garde la poitrine haute, regarde un point fixe devant toi. Renforce le gainage du tronc."))
+            risque="Pencher trop le dos en avant met une forte pression sur le bas du dos, surtout avec du poids.",
+            correction="Garde la poitrine haute et le regard droit devant toi. Imagine que tu as un verre d'eau posé sur la poitrine que tu ne veux pas renverser."))
         score -= 25
     elif bottom.back_angle > 35:
         recs.append(Recommendation('avertissement',
-            "⚠️ Légère inclinaison du dos",
+            "⚠️ Ton dos s'incline un peu trop vers l'avant",
             'dos',
-            risque="Fatigue lombaire prématurée qui peut s'accentuer à la fatigue ou avec plus de charge.",
-            correction="Pense à 'sortir la poitrine' en descendant. Inspire profondément avant chaque répétition."))
+            risque="Avec plus de poids ou à la fatigue, cette position peut fatiguer le bas du dos.",
+            correction="Avant de descendre, prends une grande inspiration, gonfle le ventre et garde cette tension. Ça va naturellement redresser le dos."))
         score -= 10
     else:
-        recs.append(Recommendation('conseil', "✅ Bonne position du dos", 'dos'))
+        recs.append(Recommendation('conseil', "✅ Belle position du dos", 'dos'))
 
     # Hanches au point bas + détection butt wink
     butt_wink = bottom.knee_angle < 85 and bottom.hip_angle < 55
     if butt_wink:
         recs.append(Recommendation('avertissement',
-            "⚠️ Rétroversion du bassin en fond de squat (butt wink)",
+            "⚠️ Le bas de ton dos s'arrondit tout en bas du squat",
             'hanche',
-            risque="Compression discale lombaire en position de flexion maximale, surtout problématique sous charge.",
-            correction="Travaille la mobilité de cheville (élévation sur planche) et de hanche. Essaie un talon légèrement surélevé."))
+            risque="Le bas du dos qui s'arrondit sous charge peut provoquer des douleurs lombaires.",
+            correction="Essaie de surélever légèrement tes talons (avec des petites plaques ou des chaussures à talon). Ça aide beaucoup si tu as peu de souplesse des chevilles."))
         score -= 15
     elif bottom.hip_angle < 55:
         recs.append(Recommendation('avertissement',
-            "⚠️ Hanches trop fermées au point bas",
+            "⚠️ Tes hanches ne s'ouvrent pas assez",
             'hanche',
-            risque="Compensation par une antéversion du bassin, tension excessive sur les adducteurs.",
-            correction="Écarte légèrement les pieds et oriente les orteils vers l'extérieur (30–45°). Travaille la mobilité de hanche."))
+            risque="Les hanches trop fermées limitent la profondeur et peuvent causer des douleurs à l'aine.",
+            correction="Écarte un peu plus les pieds et tourne les orteils vers l'extérieur (environ 30°). Teste différentes largeurs pour trouver ta position confortable."))
         score -= 15
     elif bottom.hip_angle > 110:
         recs.append(Recommendation('avertissement',
-            "⚠️ Hanches trop ouvertes au point bas",
+            "⚠️ Tes pieds sont trop écartés",
             'hanche',
-            risque="Instabilité du bassin et tension excessive sur les abducteurs.",
-            correction="Resserre légèrement l'écart des pieds pour retrouver un alignement optimal."))
+            risque="Un écart trop grand peut rendre le mouvement instable.",
+            correction="Rapproche un peu les pieds pour trouver ta largeur naturelle — généralement un peu plus large que les épaules."))
         score -= 10
 
     # ── B. ANALYSE TEMPORELLE ──────────────────────────────────────
@@ -178,10 +178,10 @@ def evaluate(frames: List[SquatFrameData], bottom_idx: int) -> Tuple[int, List[R
         avg_back_early = float(np.mean([f.back_angle for f in early]))
         if avg_back_early - bottom.back_angle > 15:
             recs.append(Recommendation('critique',
-                "❌ Les hanches montent avant le torse à la remontée",
+                "❌ Tes hanches remontent avant ton dos à la montée",
                 'dos',
-                risque="Cisaillement lombaire brutal sous charge — l'un des patterns les plus dangereux du squat.",
-                correction="Pense 'genoux et hanches remontent en même temps'. Travaille des pause squats pour renforcer le point bas."))
+                risque="C'est l'une des erreurs les plus dangereuses du squat — ça crée une forte pression sur le bas du dos.",
+                correction="Pense à pousser avec les deux jambes en même temps et à garder le dos droit tout au long de la montée. Imagine que tu veux toucher le plafond avec le haut du crâne."))
             score -= 20
 
     # B2. Effondrement progressif du torse pendant la descente
@@ -191,10 +191,10 @@ def evaluate(frames: List[SquatFrameData], bottom_idx: int) -> Tuple[int, List[R
         last_back  = float(np.mean([f.back_angle for f in descent[-quarter:]]))
         if last_back - first_back > 20:
             recs.append(Recommendation('avertissement',
-                "⚠️ Le torse s'incline progressivement pendant la descente",
+                "⚠️ Ton dos se penche de plus en plus pendant la descente",
                 'dos',
-                risque="Surcharge des érecteurs du rachis et perte de tension qui fragilise le bas du dos.",
-                correction="Inspire et engage les abdominaux avant de commencer la descente (technique Valsalva)."))
+                risque="Les muscles du dos se fatiguent en cours de descente, ce qui fragilise le bas du dos.",
+                correction="Avant de descendre, prends une grande inspiration et gonfle le ventre comme un ballon. Garde cette tension tout au long de la répétition."))
             score -= 10
 
     recs.sort(key=lambda r: SEVERITY_ORDER[r.niveau])

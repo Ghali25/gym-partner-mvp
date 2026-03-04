@@ -111,79 +111,78 @@ def evaluate(frames: List[FaceSquatFrameData], bottom_idx: int) -> Tuple[int, Li
     # ── A. VALGUS GENOU GAUCHE ────────────────────────────────────
     if bottom.valgus_g < 155:
         recs.append(Recommendation('critique',
-            "❌ Effondrement du genou gauche vers l'intérieur (valgus)",
-            'genou',
-            risque="Contrainte excessive sur le ligament croisé antérieur et le ménisque interne gauche.",
-            correction="Active les fessiers et pousse activement le genou gauche vers l'extérieur "
-                       "dans la descente. Un mini-band autour des genoux à l'entraînement aide à corriger ce pattern."))
+            "❌ Ton genou gauche s'effondre vers l'intérieur",
+            'valgus_g',
+            risque="Quand le genou part vers l'intérieur sous charge, il peut se blesser sérieusement (douleurs chroniques, entorses).",
+            correction="Pendant la descente, pousse activement ton genou gauche vers l'extérieur, dans l'axe de ton pied. "
+                       "Mets un élastique autour des genoux à l'entraînement — ça t'oblige à les écarter."))
         score -= 25
     elif bottom.valgus_g < 168:
         recs.append(Recommendation('avertissement',
-            "⚠️ Léger valgus du genou gauche",
-            'genou',
-            risque="Fatigue articulaire progressive du genou gauche, risque accru sous charge.",
-            correction="Concentre-toi sur l'alignement du genou gauche au-dessus du 2e orteil. "
-                       "Renforce les abducteurs de hanche (clamshells, bandes élastiques)."))
+            "⚠️ Ton genou gauche rentre légèrement vers l'intérieur",
+            'valgus_g',
+            risque="C'est un début de mauvaise habitude qui s'accentue avec la fatigue ou le poids.",
+            correction="Concentre-toi sur l'alignement : ton genou gauche doit toujours pointer dans la même direction que ton 2e orteil. "
+                       "Fais des exercices de fesse (pont fessier, abduction avec élastique) pour renforcer le côté gauche."))
         score -= 12
 
     # ── B. VALGUS GENOU DROIT ─────────────────────────────────────
     if bottom.valgus_d < 155:
         recs.append(Recommendation('critique',
-            "❌ Effondrement du genou droit vers l'intérieur (valgus)",
-            'genou',
-            risque="Contrainte excessive sur le ligament croisé antérieur et le ménisque interne droit.",
-            correction="Pousse activement le genou droit vers l'extérieur. "
-                       "Renforce les abducteurs et les fessiers du côté droit."))
+            "❌ Ton genou droit s'effondre vers l'intérieur",
+            'valgus_d',
+            risque="Quand le genou part vers l'intérieur sous charge, il peut se blesser sérieusement (douleurs chroniques, entorses).",
+            correction="Pendant la descente, pousse activement ton genou droit vers l'extérieur, dans l'axe de ton pied. "
+                       "Renforce les fesses du côté droit avec des fentes et des exercices unilatéraux."))
         score -= 25
     elif bottom.valgus_d < 168:
         recs.append(Recommendation('avertissement',
-            "⚠️ Léger valgus du genou droit",
-            'genou',
-            risque="Fatigue articulaire progressive du genou droit, risque accru sous charge.",
-            correction="Aligne le genou droit au-dessus du 2e orteil. "
-                       "Travaille les abducteurs de hanche."))
+            "⚠️ Ton genou droit rentre légèrement vers l'intérieur",
+            'valgus_d',
+            risque="C'est un début de mauvaise habitude qui s'accentue avec la fatigue ou le poids.",
+            correction="Ton genou droit doit toujours pointer dans la même direction que ton 2e orteil. "
+                       "Renforce les fesses du côté droit."))
         score -= 12
 
     if bottom.valgus_g >= 168 and bottom.valgus_d >= 168:
         recs.append(Recommendation('conseil',
-            "✅ Bon alignement des genoux — pas de valgus détecté", 'genou'))
+            "✅ Tes genoux sont bien alignés — aucun effondrement détecté", 'genou'))
 
     # ── C. ASYMÉTRIE GAUCHE / DROITE ──────────────────────────────
     if bottom.asymetrie > 20:
         recs.append(Recommendation('critique',
-            f"❌ Forte asymétrie gauche/droite ({bottom.asymetrie:.0f}°)",
-            'global',
-            risque="Surcharge unilatérale chronique — risque de blessure du côté le plus sollicité.",
-            correction="Travaille chaque jambe séparément (fentes, Bulgarian split squat) "
-                       "pour identifier et corriger le côté faible."))
+            f"❌ Grosse différence entre genou gauche et genou droit ({bottom.asymetrie:.0f}°)",
+            'asymetrie',
+            risque="Un côté compense pour l'autre. Sur le long terme, le côté qui travaille plus va finir par se blesser.",
+            correction="Travaille chaque jambe indépendamment : fentes avant, fentes bulgares (pied arrière posé sur un banc). "
+                       "Ça va rééquilibrer les deux côtés."))
         score -= 20
     elif bottom.asymetrie > 10:
         recs.append(Recommendation('avertissement',
-            f"⚠️ Légère asymétrie gauche/droite ({bottom.asymetrie:.0f}°)",
-            'global',
-            risque="Compensation musculaire qui s'aggrave sous charge ou à la fatigue.",
-            correction="Intègre des exercices unilatéraux à ton programme "
+            f"⚠️ Léger déséquilibre entre jambe gauche et jambe droite ({bottom.asymetrie:.0f}°)",
+            'asymetrie',
+            risque="Le déséquilibre s'accentue sous charge et peut provoquer des douleurs d'un seul côté.",
+            correction="Ajoute des exercices sur une seule jambe à la fois (fentes, montées de step) "
                        "pour équilibrer les deux côtés."))
         score -= 10
     else:
         recs.append(Recommendation('conseil',
-            "✅ Bonne symétrie gauche/droite", 'global'))
+            "✅ Bonne symétrie entre jambe gauche et jambe droite", 'asymetrie'))
 
     # ── D. LARGEUR DE STANCE ──────────────────────────────────────
     if bottom.largeur < 0.7:
         recs.append(Recommendation('avertissement',
-            "⚠️ Écartement des pieds trop étroit",
+            "⚠️ Tes pieds sont trop proches l'un de l'autre",
             'hanche',
-            risque="Limite la profondeur et augmente la contrainte sur les chevilles et genoux.",
-            correction="Écarte les pieds à la largeur des épaules ou légèrement plus, "
-                       "orteils légèrement tournés vers l'extérieur (20-30°)."))
+            risque="Un écart trop étroit rend difficile la descente profonde et met les chevilles et genoux sous pression.",
+            correction="Écarte les pieds à la largeur de tes épaules ou un peu plus, et tourne les orteils légèrement vers l'extérieur (environ 20-30°)."))
         score -= 10
     elif bottom.largeur > 1.8:
         recs.append(Recommendation('avertissement',
-            "⚠️ Écartement des pieds trop large",
+            "⚠️ Tes pieds sont trop écartés",
             'hanche',
-            risque="Tension excessive sur les adducteurs et instabilité du bassin.",
-            correction="Rapproche légèrement les pieds pour trouver ta position naturelle."))
+            risque="Un écart trop grand peut rendre le mouvement instable et tirer sur les muscles de l'intérieur des cuisses.",
+            correction="Rapproche un peu les pieds pour trouver ta position naturelle."))
         score -= 8
     else:
         recs.append(Recommendation('conseil',
@@ -194,11 +193,11 @@ def evaluate(frames: List[FaceSquatFrameData], bottom_idx: int) -> Tuple[int, Li
         init_avg = float(np.mean([(f.valgus_g + f.valgus_d) / 2 for f in frames[:3]]))
         if (bottom.valgus_g < init_avg - 20) or (bottom.valgus_d < init_avg - 20):
             recs.append(Recommendation('avertissement',
-                "⚠️ Les genoux s'effondrent progressivement pendant la descente",
+                "⚠️ Tes genoux rentrent vers l'intérieur au fur et à mesure que tu descends",
                 'genou',
-                risque="Les stabilisateurs cèdent à la fatigue — dangereux en fin de série sous charge.",
-                correction="Réduis le poids le temps de corriger le pattern. "
-                           "Renforce les abducteurs (monster walks, clamshells avec bande)."))
+                risque="C'est souvent un signe que les fesses ne sont pas assez fortes pour tenir le genou aligné sous effort.",
+                correction="Réduis temporairement le poids jusqu'à maîtriser l'alignement. "
+                           "Fais des marches avec élastique autour des genoux (side steps) pour renforcer les fesses."))
             score -= 10
 
     recs.sort(key=lambda r: SEVERITY_ORDER[r.niveau])

@@ -119,30 +119,30 @@ def evaluate(frames: List[BenchFrameData], bottom_idx: int) -> Tuple[int, List[R
     if bottom.coude_angle > 100:
         recs.append(Recommendation(
             'avertissement',
-            "⚠️ Manque de profondeur — la barre ne descend pas assez bas",
+            "⚠️ La barre ne descend pas assez bas",
             'coude',
-            risque="Réduction de l'amplitude de travail du grand pectoral, gain musculaire limité.",
-            correction="Descends jusqu'à effleurer la poitrine avec la barre. Vise un angle de coude autour de 90°."))
+            risque="En ne descendant pas jusqu'à la poitrine, tes pectoraux ne travaillent que sur la moitié du mouvement.",
+            correction="Descends la barre jusqu'à ce qu'elle effleure le bas de ta poitrine avant de repousser. Ton coude doit former un angle d'environ 90°."))
         score -= 15
 
     # Règle 2 — Flare excessif des coudes (epaule_angle trop grand)
     if bottom.epaule_angle > 80:
         recs.append(Recommendation(
             'critique',
-            "❌ Flare excessif des coudes — stress critique sur l'épaule",
+            "❌ Tes coudes s'écartent trop sur les côtés",
             'epaule',
-            risque="Compression acromio-claviculaire et sur-sollicitation de la coiffe des rotateurs. Risque élevé de blessure à l'épaule.",
-            correction="Rentre les coudes à environ 45-75° par rapport au torse. Imagine que tu veux 'casser la barre' avec tes mains."))
+            risque="Quand les coudes partent trop sur le côté, l'épaule encaisse toute la charge. C'est la blessure la plus courante au bench press.",
+            correction="Rentre légèrement les coudes vers ton ventre — vise environ 45° par rapport à ton corps. Imagine que tu veux visser tes mains vers l'intérieur sans bouger la barre."))
         score -= 30
 
     # Règle 3 — Coudes trop serrés
     elif bottom.epaule_angle < 30:
         recs.append(Recommendation(
             'conseil',
-            "💡 Coudes trop serrés contre le corps",
+            "💡 Tes coudes sont trop collés au corps",
             'epaule',
-            risque="Sous-activation du grand pectoral, charge reportée sur les triceps.",
-            correction="Écarte légèrement les coudes vers 45°. Ça va améliorer l'activation des pectoraux."))
+            risque="Les pectoraux ne s'activent presque pas, c'est uniquement les triceps (arrière du bras) qui poussent.",
+            correction="Écarte un peu les coudes — vise environ 45° par rapport au corps. Tu vas sentir beaucoup plus les pectoraux travailler."))
         score -= 5
 
     # ── B. ANALYSE TEMPORELLE ─────────────────────────────────────
@@ -153,10 +153,10 @@ def evaluate(frames: List[BenchFrameData], bottom_idx: int) -> Tuple[int, List[R
         if max_elbow_ascent < 155:
             recs.append(Recommendation(
                 'conseil',
-                "💡 Lockout incomplet — bras non verrouillés en haut",
+                "💡 Tu n'étends pas complètement les bras en haut",
                 'coude',
-                risque="Fatigue prématurée des triceps, développement musculaire partiel sur la plage haute du mouvement.",
-                correction="Pousse jusqu'à extension complète des coudes (160-180°) en haut du mouvement."))
+                risque="Ne pas étendre complètement les bras garde les muscles sous tension constante — bonne pour la pump mais fatigue vite.",
+                correction="Pousse jusqu'à ce que les bras soient presque tendus en haut. Ça te permet de souffler entre chaque répétition."))
             score -= 10
 
     # Règle 5 — Descente non contrôlée
@@ -167,10 +167,10 @@ def evaluate(frames: List[BenchFrameData], bottom_idx: int) -> Tuple[int, List[R
         if early_coude - late_coude > 40:
             recs.append(Recommendation(
                 'avertissement',
-                "⚠️ Descente trop rapide et non contrôlée",
+                "⚠️ Tu laisses tomber la barre trop vite",
                 'coude',
-                risque="Risque de blessure à l'épaule et aux poignets par inertie. Chute de la barre sur la poitrine possible.",
-                correction="Prends 2-3 secondes pour descendre la barre. La descente contrôlée augmente le temps sous tension et la sécurité."))
+                risque="Lâcher la barre sans contrôle peut blesser les épaules ou les poignets par le choc à l'impact.",
+                correction="Prends 2 à 3 secondes pour descendre la barre lentement. La descente contrôlée est aussi efficace que la montée."))
             score -= 10
 
     # Règle 6 — Arc lombaire instable pendant la remontée
@@ -179,10 +179,10 @@ def evaluate(frames: List[BenchFrameData], bottom_idx: int) -> Tuple[int, List[R
         if dos_std > 12:
             recs.append(Recommendation(
                 'conseil',
-                "💡 Position du dos instable pendant la poussée",
+                "💡 Ton dos bouge trop pendant la poussée",
                 'dos',
-                risque="Instabilité du tronc qui réduit la transmission de force et peut générer des compensations lombaires.",
-                correction="Maintiens une position dorsale stable du début à la fin. Pense à contracter les abdos et les fessiers."))
+                risque="Un dos qui se tortille réduit la force que tu peux pousser et peut causer des douleurs.",
+                correction="Garde les omoplates bien serrées l'une contre l'autre et les fesses collées au banc du début à la fin. Contracte le ventre comme si tu allais recevoir un coup."))
             score -= 5
 
     recs.sort(key=lambda r: SEVERITY_ORDER[r.niveau])
