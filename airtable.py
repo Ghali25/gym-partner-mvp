@@ -8,10 +8,11 @@ Configuration requise dans .env :
     AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
 
 Table Airtable attendue : "Analyses"
-Champs : Exercice, Score, Date, Critiques, Avertissements, Conseils, Recommandations
+Champs : Exercice, Score, Date, Critiques, Avertissements, Conseils, Recommandations, Angles
 """
 
 import os
+import json
 import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -49,20 +50,18 @@ def log_analysis(result: dict) -> None:
     critiques      = sum(1 for r in recs if r.get("niveau") == "critique")
     avertissements = sum(1 for r in recs if r.get("niveau") == "avertissement")
     conseils       = sum(1 for r in recs if r.get("niveau") == "conseil")
-    reco_text      = "\n".join(
-        f"[{r.get('niveau', '').upper()}] {r.get('message', '')}"
-        for r in recs
-    )
 
     payload = {
         "fields": {
-            "Exercice":       result.get("exercise", "squat").capitalize(),
-            "Score":          result.get("score", 0),
-            "Date":           datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-            "Critiques":      critiques,
-            "Avertissements": avertissements,
-            "Conseils":       conseils,
-            "Recommandations": reco_text,
+            "Exercice":        result.get("exercise", "squat").capitalize(),
+            "Score":           result.get("score", 0),
+            "Date":            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+            "Critiques":       critiques,
+            "Avertissements":  avertissements,
+            "Conseils":        conseils,
+            # Stockés en JSON pour pouvoir reconstituer les résultats au clic
+            "Recommandations": json.dumps(recs, ensure_ascii=False),
+            "Angles":          json.dumps(result.get("angles", {}), ensure_ascii=False),
         }
     }
 

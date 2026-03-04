@@ -552,10 +552,13 @@
     .history-card {
       min-width: 100px; background: #111; border: 1px solid #1c1c1c;
       border-radius: 10px; padding: 14px 12px; flex-shrink: 0;
-      cursor: default; transition: border-color .2s; position: relative;
+      cursor: pointer; transition: border-color .2s, transform .15s; position: relative;
     }
-    .history-card:hover { border-color: #333; }
+    .history-card:hover { border-color: var(--orange); transform: translateY(-2px); }
     .history-card.latest { border-color: rgba(255,92,26,0.4); }
+    .history-card-hint { font-size: 9px; color: var(--orange); margin-top: 8px;
+                         opacity: 0; transition: opacity .2s; letter-spacing: 1px; }
+    .history-card:hover .history-card-hint { opacity: 1; }
     .history-score { font-size: 28px; font-family: 'Bebas Neue', sans-serif; line-height: 1; }
     .history-date { font-size: 10px; color: #444; margin: 4px 0 8px; }
     .history-delta { font-size: 10px; font-weight: 600; margin-bottom: 6px; }
@@ -571,7 +574,7 @@
     /* Light mode overrides */
     html[data-theme="light"] .history-group-header { border-color: #ddd9d2; }
     html[data-theme="light"] .history-cards-row .history-card { background: #fff; border-color: #ddd9d2; }
-    html[data-theme="light"] .history-cards-row .history-card:hover { border-color: #bbb; }
+    html[data-theme="light"] .history-cards-row .history-card:hover { border-color: var(--orange); }
     html[data-theme="light"] .history-date { color: #aaa; }
 
     /* Footer tips */
@@ -1038,6 +1041,13 @@
       btnText.textContent = 'ANALYSER À NOUVEAU';
       analyzeBtn.disabled = false;
 
+      // Cacher le placeholder
+      emptyState.style.display = 'none';
+
+      // Normaliser les données (compatibilité anciens enregistrements)
+      data.angles         = data.angles         || {};
+      data.recommandations = Array.isArray(data.recommandations) ? data.recommandations : [];
+
       // Score
       const scoreCard = document.getElementById('scoreCard');
       scoreCard.style.display = 'block';
@@ -1074,9 +1084,10 @@
           const nameEl = el.querySelector('.angle-name');
           if (nameEl) nameEl.textContent = label;
           const v = data.angles[key];
-          document.getElementById(val).textContent = v + '°';
+          document.getElementById(val).textContent = (v !== undefined && v !== null) ? v + '°' : '—';
           const s = document.getElementById(status);
-          if (v >= min && v <= max) { s.textContent = '● Bon'; s.className = 'angle-status ok'; }
+          if (v === undefined || v === null) { s.textContent = ''; s.className = 'angle-status'; }
+          else if (v >= min && v <= max) { s.textContent = '● Bon'; s.className = 'angle-status ok'; }
           else if (v < min * 0.85 || v > max * 1.15) { s.textContent = '● À corriger'; s.className = 'angle-status bad'; }
           else { s.textContent = '● À surveiller'; s.className = 'angle-status warn'; }
         }, i * 120);
@@ -1089,6 +1100,11 @@
       const list = document.getElementById('recoList');
       list.innerHTML = '';
       list.style.display = 'flex';
+
+      // Ancien enregistrement sans détails JSON — message informatif
+      if (!data.recommandations.length && !Object.keys(data.angles).length) {
+        list.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0">Détails non disponibles — réanalyse la vidéo pour voir les recommandations complètes.</p>';
+      }
 
       const badgeLabels  = { critique: 'Critique', avertissement: 'À corriger', conseil: 'Conseil' };
       const partieLabels = { genou: 'Genou', hanche: 'Hanche', dos: 'Dos', global: 'Global', coude: 'Coude', epaule: 'Épaule', valgus_g: 'Genou G', valgus_d: 'Genou D', asymetrie: 'Asymétrie' };
@@ -1174,6 +1190,9 @@
       squat_face: { icon: '👁', label: 'Squat — Face' },
     };
 
+    // Map id → enregistrement complet pour le clic
+    let _historyMap = {};
+
     async function loadHistory() {
       const container = document.getElementById('historyList');
       try {
@@ -1183,6 +1202,10 @@
           container.innerHTML = '<p class="history-empty">Aucune analyse enregistrée</p>';
           return;
         }
+
+        // Stocker dans la map globale
+        _historyMap = {};
+        records.forEach(r => { _historyMap[r.id] = r; });
 
         // Regrouper par exercice
         const groups = {};
@@ -1222,12 +1245,14 @@
               r.Conseils       > 0 ? `<span class="h-tag conseil">${r.Conseils}💡</span>` : '',
             ].filter(Boolean).join('');
             const isLatest = i === recs.length - 1;
+            // data-rid pour retrouver l'enregistrement au clic
             return `
-              <div class="history-card${isLatest ? ' latest' : ''}">
+              <div class="history-card${isLatest ? ' latest' : ''}" data-rid="${r.id}" title="Cliquer pour revoir les résultats">
                 <div class="history-score" style="color:${color}">${score}</div>
                 <div class="history-date">${date}</div>
                 ${deltaHtml}
                 <div class="history-tags">${tags}</div>
+                <div class="history-card-hint">Voir →</div>
               </div>`;
           }).join('');
 
@@ -1251,6 +1276,30 @@
         container.innerHTML = '<p class="history-empty">Historique indisponible</p>';
       }
     }
+
+    // Clic sur une carte historique → affichage zone 04
+    document.getElementById('historyList').addEventListener('click', e => {
+      const card = e.target.closest('.history-card[data-rid]');
+      if (!card) return;
+      const rec = _historyMap[card.dataset.rid];
+      if (!rec) return;
+
+      let angles = {};
+      try { angles = JSON.parse(rec.Angles || '{}'); } catch {}
+
+      let recommandations = [];
+      try {
+        const parsed = JSON.parse(rec.Recommandations || '[]');
+        if (Array.isArray(parsed)) recommandations = parsed;
+      } catch {}
+
+      const exercise = (rec.Exercice || 'squat').toLowerCase().replace(' ', '_');
+
+      displayResults({ exercise, score: rec.Score ?? 0, angles, recommandations });
+
+      // Scroll vers la zone 04 — Résultats
+      document.querySelector('.results-zone').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     // Charger l'historique au démarrage
     loadHistory();
