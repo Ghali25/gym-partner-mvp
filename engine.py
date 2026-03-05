@@ -174,9 +174,16 @@ def analyze_video(video_path: str, exercise: str = 'squat') -> dict:
             if result.pose_world_landmarks and len(result.pose_world_landmarks) > 0:
                 lm = result.pose_world_landmarks[0]
                 frame = build_frame_data(lm)
+                if analyzed == 1:   # log une seule fois par vidéo
+                    wl = result.pose_world_landmarks[0]
+                    print(f"[3D ✅] hanche=({wl[23].x:.3f}, {wl[23].y:.3f}, {wl[23].z:.3f})m  "
+                          f"genou=({wl[25].x:.3f}, {wl[25].y:.3f}, {wl[25].z:.3f})m  "
+                          f"cheville=({wl[27].x:.3f}, {wl[27].y:.3f}, {wl[27].z:.3f})m")
             else:
                 lm = result.pose_landmarks[0]
                 frame = build_frame_data(lm)
+                if analyzed == 1:
+                    print("[2D ⚠️] fallback sur landmarks normalisés (world landmarks indisponibles)")
             if frame is not None:
                 frames.append(frame)
 

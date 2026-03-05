@@ -194,82 +194,73 @@
     }
 
     /* Camera angle selector */
-    .cam-selector {
+    /* ── Info vues de caméra (remplace les cam-buttons) ── */
+    .view-info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .cam-btn {
+    .view-info-card {
       background: #111;
       border: 1.5px solid #1e1e1e;
       border-radius: 10px;
-      padding: 16px;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s;
-      font-family: inherit;
+      padding: 14px 16px;
     }
 
-    .cam-btn:hover:not(:disabled) { border-color: #333; }
-    .cam-btn.active { border-color: var(--orange); background: rgba(255,92,26,0.06); }
-    .cam-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    .cam-header {
+    .view-info-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .cam-icon { font-size: 16px; }
-
-    .cam-name {
+      margin-bottom: 10px;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.5px;
-      color: #888;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--orange);
     }
 
-    .cam-btn.active .cam-name { color: var(--orange); }
-
-    .soon-tag {
-      font-size: 8px;
-      background: #222;
-      color: #444;
-      padding: 1px 6px;
-      border-radius: 10px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .cam-features {
+    .view-info-list {
       list-style: none;
       display: flex;
       flex-direction: column;
       gap: 5px;
     }
 
-    .cam-features li {
+    .view-info-list li {
       font-size: 11px;
-      color: #444;
+      color: #555;
       padding-left: 14px;
       position: relative;
       line-height: 1.4;
     }
 
-    .cam-features li::before {
-      content: '·';
-      position: absolute;
-      left: 4px;
-      color: #333;
-    }
+    .view-info-list li::before { content: '·'; position: absolute; left: 4px; color: var(--orange); }
 
-    .cam-btn.active .cam-features li { color: #666; }
-    .cam-btn.active .cam-features li::before { color: var(--orange); }
+    /* ── Double upload ── */
+    .dual-upload { display: flex; gap: 12px; }
+    .upload-slot { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .slot-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      color: #555; display: flex; align-items: center; gap: 6px;
+    }
+    .slot-required {
+      background: rgba(255,92,26,0.15); color: var(--orange);
+      font-size: 9px; padding: 2px 6px; border-radius: 8px; letter-spacing: 0.5px;
+    }
+    .slot-optional {
+      background: #1c1c1c; color: #555;
+      font-size: 9px; padding: 2px 6px; border-radius: 8px; letter-spacing: 0.5px;
+    }
+    .dropzone-secondary { border-style: dashed; border-color: #222; opacity: 0.85; }
+    .dropzone-secondary:hover { opacity: 1; }
+
+    /* ── Score breakdown (profil + face) ── */
+    .score-breakdown { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .breakdown-badge {
+      font-size: 11px; font-weight: 500; color: #666;
+      background: #161616; border: 1px solid #222;
+      padding: 3px 10px; border-radius: 20px;
+    }
 
     /* Exercise selector */
     .exercise-grid {
@@ -625,6 +616,10 @@
     html[data-theme="light"] .exercise-btn         { background: #fff; border-color: #ddd9d2; }
     html[data-theme="light"] .exercise-btn:hover   { border-color: #bbb; }
     html[data-theme="light"] .exercise-btn .name   { color: #666; }
+    html[data-theme="light"] .view-info-card       { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .view-info-list li    { color: #999; }
+    html[data-theme="light"] .slot-optional        { background: #ece8e0; }
+    html[data-theme="light"] .breakdown-badge      { background: #f5f0e8; border-color: #ddd9d2; }
     html[data-theme="light"] .dropzone             { border-color: #c8c4bc; }
     html[data-theme="light"] .dropzone-icon        { background: #ece8e0; }
     html[data-theme="light"] .video-preview,
@@ -684,33 +679,24 @@
     <div class="upload-zone">
 
       <div>
-        <div class="section-label">01 — Angle de caméra</div>
-        <div class="cam-selector">
-          <button class="cam-btn active" data-cam="profil">
-            <div class="cam-header">
-              <span class="cam-icon">📐</span>
-              <span class="cam-name">Profil</span>
-            </div>
-            <ul class="cam-features">
+        <div class="section-label">01 — Que filmer ?</div>
+        <div class="view-info-grid" id="viewInfoGrid">
+          <div class="view-info-card">
+            <div class="view-info-header"><span>📐</span><span>Vue de profil</span></div>
+            <ul class="view-info-list">
               <li>Profondeur du squat</li>
               <li>Position du dos</li>
               <li>Ouverture des hanches</li>
-              <li>Butt wink (rétroversion du bassin)</li>
-              <li>Hip shoot-up (hanches avant le torse)</li>
             </ul>
-          </button>
-          <button class="cam-btn" data-cam="face">
-            <div class="cam-header">
-              <span class="cam-icon">👁</span>
-              <span class="cam-name">Face</span>
-            </div>
-            <ul class="cam-features">
-              <li>Knee valgus (genoux qui s'effondrent)</li>
+          </div>
+          <div class="view-info-card" id="faceInfoCard">
+            <div class="view-info-header"><span>👁</span><span>Vue de face</span></div>
+            <ul class="view-info-list">
+              <li>Genoux qui s'effondrent</li>
               <li>Asymétrie gauche / droite</li>
               <li>Écart des pieds</li>
-              <li>Charge déséquilibrée</li>
             </ul>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -733,22 +719,49 @@
       </div>
 
       <div>
-        <div class="section-label">03 — Vidéo</div>
-        <div class="dropzone" id="dropzone">
-          <input type="file" id="videoInput" accept="video/*" />
-          <div class="dropzone-icon">
-            <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M15 10l4.553-2.277A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
-          </div>
-          <h3>Dépose ta vidéo ici</h3>
-          <p>MP4, MOV — Max 200 Mo<br/>Vue de profil recommandée</p>
-        </div>
+        <div class="section-label">03 — Vidéos</div>
+        <div class="dual-upload">
 
-        <div class="video-preview" id="videoPreview">
-          <video id="videoPlayer" controls muted></video>
-          <div class="video-info">
-            <span id="videoName">—</span>
-            <button class="remove-btn" id="removeBtn">✕ SUPPRIMER</button>
+          <!-- Slot profil (toujours visible) -->
+          <div class="upload-slot">
+            <div class="slot-label">📐 Vue de profil <span class="slot-required">obligatoire</span></div>
+            <div class="dropzone" id="dropzone">
+              <input type="file" id="videoInput" accept="video/*" />
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M15 10l4.553-2.277A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+              </div>
+              <h3>Dépose ta vidéo ici</h3>
+              <p>MP4, MOV — Max 200 Mo</p>
+            </div>
+            <div class="video-preview" id="videoPreview">
+              <video id="videoPlayer" controls muted></video>
+              <div class="video-info">
+                <span id="videoName">—</span>
+                <button class="remove-btn" id="removeBtn">✕</button>
+              </div>
+            </div>
           </div>
+
+          <!-- Slot face (squat uniquement) -->
+          <div class="upload-slot" id="slotFace" style="display:none">
+            <div class="slot-label">👁 Vue de face <span class="slot-optional">optionnelle</span></div>
+            <div class="dropzone dropzone-secondary" id="dropzoneFace">
+              <input type="file" id="videoInputFace" accept="video/*" />
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M15 10l4.553-2.277A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+              </div>
+              <h3>Dépose ta vidéo ici</h3>
+              <p>MP4, MOV — Max 200 Mo</p>
+            </div>
+            <div class="video-preview" id="videoPreviewFace">
+              <video id="videoPlayerFace" controls muted></video>
+              <div class="video-info">
+                <span id="videoNameFace">—</span>
+                <button class="remove-btn" id="removeBtnFace">✕</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -775,6 +788,10 @@
             <div style="display:flex; align-items:baseline; gap:8px;">
               <div class="score-number" id="scoreNumber">—</div>
               <div class="score-label">/ 100</div>
+            </div>
+            <div class="score-breakdown" id="scoreBreakdown" style="display:none">
+              <span class="breakdown-badge" id="scoreProfilBadge">📐 —</span>
+              <span class="breakdown-badge" id="scoreFaceBadge">👁 —</span>
             </div>
           </div>
           <!-- Schéma corporel -->
@@ -884,66 +901,58 @@
     });
 
     // ── State ──────────────────────────────────────
-    let videoFile = null;
+    let videoFile     = null;   // vidéo profil (obligatoire)
+    let videoFileFace = null;   // vidéo face   (optionnelle, squat seulement)
     let selectedExercise = 'squat';
-    let selectedCamera   = 'profil';
-
-    function getEffectiveExercise() {
-      if (selectedExercise === 'squat' && selectedCamera === 'face') return 'squat_face';
-      return selectedExercise;
-    }
 
     // ── DOM refs ───────────────────────────────────
-    const dropzone     = document.getElementById('dropzone');
-    const videoInput   = document.getElementById('videoInput');
-    const videoPreview = document.getElementById('videoPreview');
-    const videoPlayer  = document.getElementById('videoPlayer');
-    const videoName    = document.getElementById('videoName');
-    const removeBtn    = document.getElementById('removeBtn');
-    const analyzeBtn   = document.getElementById('analyzeBtn');
-    const btnText      = document.getElementById('btnText');
-    const spinner      = document.getElementById('spinner');
-    const emptyState   = document.getElementById('emptyState');
-
-    // ── Camera selection ───────────────────────────
-    document.querySelectorAll('.cam-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.disabled) return;
-        document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedCamera = btn.dataset.cam;
-      });
-    });
+    const dropzone          = document.getElementById('dropzone');
+    const videoInput        = document.getElementById('videoInput');
+    const videoPreview      = document.getElementById('videoPreview');
+    const videoPlayer       = document.getElementById('videoPlayer');
+    const videoName         = document.getElementById('videoName');
+    const removeBtn         = document.getElementById('removeBtn');
+    const dropzoneFace      = document.getElementById('dropzoneFace');
+    const videoInputFace    = document.getElementById('videoInputFace');
+    const videoPreviewFace  = document.getElementById('videoPreviewFace');
+    const videoPlayerFace   = document.getElementById('videoPlayerFace');
+    const videoNameFace     = document.getElementById('videoNameFace');
+    const removeBtnFace     = document.getElementById('removeBtnFace');
+    const slotFace          = document.getElementById('slotFace');
+    const faceInfoCard      = document.getElementById('faceInfoCard');
+    const analyzeBtn        = document.getElementById('analyzeBtn');
+    const btnText           = document.getElementById('btnText');
+    const spinner           = document.getElementById('spinner');
+    const emptyState        = document.getElementById('emptyState');
 
     // ── Exercise selection ─────────────────────────
-    const faceCamBtn = document.querySelector('.cam-btn[data-cam="face"]');
-
     document.querySelectorAll('.exercise-btn:not(.soon)').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.exercise-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedExercise = btn.dataset.ex;
 
-        // Vue de face uniquement disponible pour le squat
-        if (selectedExercise !== 'squat') {
-          faceCamBtn.disabled = true;
-          if (selectedCamera === 'face') {
-            selectedCamera = 'profil';
-            document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.cam-btn[data-cam="profil"]').classList.add('active');
-          }
-        } else {
-          faceCamBtn.disabled = false;
+        // Slot face + info card : visibles uniquement pour le squat
+        const isSquat = selectedExercise === 'squat';
+        slotFace.style.display    = isSquat ? 'flex' : 'none';
+        faceInfoCard.style.display = isSquat ? '' : 'none';
+
+        // Si on passe à bench, effacer la vidéo face
+        if (!isSquat && videoFileFace) {
+          videoFileFace = null;
+          videoPlayerFace.src = '';
+          videoPreviewFace.style.display = 'none';
+          dropzoneFace.style.display = 'block';
+          videoInputFace.value = '';
         }
       });
     });
 
-    // ── File handling ──────────────────────────────
+    // ── File handling — profil ─────────────────────
     function handleFile(file) {
       if (!file || !file.type.startsWith('video/')) return;
       videoFile = file;
-      const url = URL.createObjectURL(file);
-      videoPlayer.src = url;
+      videoPlayer.src = URL.createObjectURL(file);
       videoName.textContent = file.name;
       dropzone.style.display = 'none';
       videoPreview.style.display = 'block';
@@ -951,22 +960,39 @@
     }
 
     videoInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
     dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
     dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
     dropzone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropzone.classList.remove('drag-over');
+      e.preventDefault(); dropzone.classList.remove('drag-over');
       handleFile(e.dataTransfer.files[0]);
     });
-
     removeBtn.addEventListener('click', () => {
-      videoFile = null;
-      videoPlayer.src = '';
-      videoPreview.style.display = 'none';
-      dropzone.style.display = 'block';
-      analyzeBtn.disabled = true;
-      videoInput.value = '';
+      videoFile = null; videoPlayer.src = '';
+      videoPreview.style.display = 'none'; dropzone.style.display = 'block';
+      analyzeBtn.disabled = true; videoInput.value = '';
+    });
+
+    // ── File handling — face ───────────────────────
+    function handleFileFace(file) {
+      if (!file || !file.type.startsWith('video/')) return;
+      videoFileFace = file;
+      videoPlayerFace.src = URL.createObjectURL(file);
+      videoNameFace.textContent = file.name;
+      dropzoneFace.style.display = 'none';
+      videoPreviewFace.style.display = 'block';
+    }
+
+    videoInputFace.addEventListener('change', e => handleFileFace(e.target.files[0]));
+    dropzoneFace.addEventListener('dragover', e => { e.preventDefault(); dropzoneFace.classList.add('drag-over'); });
+    dropzoneFace.addEventListener('dragleave', () => dropzoneFace.classList.remove('drag-over'));
+    dropzoneFace.addEventListener('drop', e => {
+      e.preventDefault(); dropzoneFace.classList.remove('drag-over');
+      handleFileFace(e.dataTransfer.files[0]);
+    });
+    removeBtnFace.addEventListener('click', () => {
+      videoFileFace = null; videoPlayerFace.src = '';
+      videoPreviewFace.style.display = 'none'; dropzoneFace.style.display = 'block';
+      videoInputFace.value = '';
     });
 
     // ── Analyse ────────────────────────────────────
@@ -983,15 +1009,20 @@
       hideResults();
 
       try {
-        // Envoyer la vidéo au serveur Flask
-        const formData = new FormData();
-        formData.append('video', videoFile);
-        formData.append('exercise', getEffectiveExercise());
-
-        const response = await fetch('/analyze', {
-          method: 'POST',
-          body: formData
-        });
+        // Routing : combiné si les deux vidéos sont présentes, sinon standard
+        let response;
+        if (selectedExercise === 'squat' && videoFileFace) {
+          const formData = new FormData();
+          formData.append('video_profil', videoFile);
+          formData.append('video_face', videoFileFace);
+          btnText.textContent = 'ANALYSE COMBINÉE…';
+          response = await fetch('/analyze-combined', { method: 'POST', body: formData });
+        } else {
+          const formData = new FormData();
+          formData.append('video', videoFile);
+          formData.append('exercise', selectedExercise);
+          response = await fetch('/analyze', { method: 'POST', body: formData });
+        }
 
         if (!response.ok) {
           const err = await response.json();
@@ -1056,6 +1087,16 @@
         document.getElementById('scoreBar').style.width = data.score + '%';
       }, 100);
 
+      // Score breakdown pour analyse combinée
+      const scoreBreakdown = document.getElementById('scoreBreakdown');
+      if (data.score_profil !== undefined && data.score_face !== undefined) {
+        document.getElementById('scoreProfilBadge').textContent = `📐 Profil : ${data.score_profil}`;
+        document.getElementById('scoreFaceBadge').textContent   = `👁 Face : ${data.score_face}`;
+        scoreBreakdown.style.display = 'flex';
+      } else {
+        scoreBreakdown.style.display = 'none';
+      }
+
       // Angles — config par exercice
       const ANGLE_CONFIG = {
         squat: [
@@ -1072,6 +1113,11 @@
           { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Valgus G', key: 'valgus_g', min: 168, max: 180 },
           { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Valgus D', key: 'valgus_d', min: 168, max: 180 },
           { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Asymétrie',key: 'asymetrie',min: 0,   max: 10  },
+        ],
+        squat_combined: [
+          { card: 'angleKnee', val: 'kneeVal', status: 'kneeStatus', label: 'Genou',    key: 'genou',    min: 70,  max: 100 },
+          { card: 'angleHip',  val: 'hipVal',  status: 'hipStatus',  label: 'Valgus G', key: 'valgus_g', min: 168, max: 180 },
+          { card: 'angleBack', val: 'backVal', status: 'backStatus', label: 'Dos',      key: 'dos',      min: 0,   max: 35  },
         ],
       };
       const exercise = data.exercise || 'squat';
@@ -1185,9 +1231,10 @@
 
     // ── Historique Airtable ────────────────────────
     const EXO_META = {
-      squat:      { icon: '🦵', label: 'Squat — Profil' },
-      bench:      { icon: '💪', label: 'Bench Press' },
-      squat_face: { icon: '👁', label: 'Squat — Face' },
+      squat:          { icon: '🦵', label: 'Squat — Profil' },
+      bench:          { icon: '💪', label: 'Bench Press' },
+      squat_face:     { icon: '👁', label: 'Squat — Face' },
+      squat_combined: { icon: '🔄', label: 'Squat — Complet' },
     };
 
     // Map id → enregistrement complet pour le clic
@@ -1351,6 +1398,12 @@
         applyColor(['body-genou-g'],                   getStatus(angles.valgus_g, 168, 180));
         applyColor(['body-genou-d'],                   getStatus(angles.valgus_d, 168, 180));
         applyColor(['body-hanche'],                    getStatus(angles.asymetrie,  0,  10));
+      } else if (exercise === 'squat_combined') {
+        // Vue combinée : dos + hanche depuis profil, genoux individuels depuis face
+        applyColor(['body-dos'],                       getStatus(angles.dos,       0,  35));
+        applyColor(['body-hanche'],                    getStatus(angles.hanche,   55, 110));
+        applyColor(['body-genou-g'],                   getStatus(angles.valgus_g, 168, 180));
+        applyColor(['body-genou-d'],                   getStatus(angles.valgus_d, 168, 180));
       } else {
         applyColor(['body-dos'],                       getStatus(angles.dos,       0,  35));
         applyColor(['body-hanche'],                    getStatus(angles.hanche,   55, 110));
@@ -1361,6 +1414,7 @@
     function hideResults() {
       document.getElementById('scoreCard').style.display = 'none';
       document.getElementById('recoList').style.display = 'none';
+      document.getElementById('scoreBreakdown').style.display = 'none';
       ['angleKnee', 'angleHip', 'angleBack'].forEach(id => {
         document.getElementById(id).style.display = 'none';
       });
