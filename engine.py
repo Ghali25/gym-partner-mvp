@@ -68,7 +68,7 @@ def calculate_back_angle(hip, shoulder) -> float:
     norm = np.linalg.norm(spine)
     if norm < 1e-6:
         return 0.0
-    vertical_up = np.array([0.0, 1.0, 0.0])   # Y est vers le haut en world coords
+    vertical_up = np.array([0.0, -1.0, 0.0])  # Y pointe vers le BAS en world coords MediaPipe
     cosine = np.clip(np.dot(spine / norm, vertical_up), -1.0, 1.0)
     return round(float(np.degrees(np.arccos(cosine))), 1)
 
