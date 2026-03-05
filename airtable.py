@@ -8,7 +8,8 @@ Configuration requise dans .env :
     AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
 
 Table Airtable attendue : "Analyses"
-Champs : Exercice, Score, Date, Critiques, Avertissements, Conseils, Recommandations, Angles
+Champs : Exercice, Score, Date, Critiques, Avertissements, Conseils,
+         Recommandations, Angles, Utilisateur
 """
 
 import os
@@ -38,7 +39,7 @@ def _is_configured() -> bool:
                 and not _BASE_ID.startswith("app" + "X"))
 
 
-def log_analysis(result: dict) -> None:
+def log_analysis(result: dict, user: str = '') -> None:
     """
     Enregistre une analyse réussie dans Airtable.
     Silencieux si les credentials ne sont pas configurés ou si Airtable est hors ligne.
@@ -59,7 +60,8 @@ def log_analysis(result: dict) -> None:
             "Critiques":       critiques,
             "Avertissements":  avertissements,
             "Conseils":        conseils,
-            # Stockés en JSON pour pouvoir reconstituer les résultats au clic
+            "Utilisateur":     user or "Anonyme",
+            # Stockés en JSON pour reconstituer les résultats au clic
             "Recommandations": json.dumps(recs, ensure_ascii=False),
             "Angles":          json.dumps(result.get("angles", {}), ensure_ascii=False),
         }
@@ -71,23 +73,29 @@ def log_analysis(result: dict) -> None:
         pass  # Ne jamais bloquer le flux principal
 
 
-def get_history(limit: int = 10) -> list:
+def get_history(limit: int = 50, user: str = '') -> list:
     """
     Retourne les `limit` dernières analyses triées par date décroissante.
+    Si `user` est fourni, filtre par utilisateur (insensible à la casse).
     Retourne [] si non configuré ou en cas d'erreur.
     """
     if not _is_configured():
         return []
 
     try:
+        params = {
+            "sort[0][field]":     "Date",
+            "sort[0][direction]": "desc",
+            "maxRecords":         limit,
+        }
+        if user:
+            safe = user.replace("'", "\\'")
+            params["filterByFormula"] = f"LOWER({{Utilisateur}})=LOWER('{safe}')"
+
         resp = requests.get(
             _BASE_URL,
             headers=_headers(),
-            params={
-                "sort[0][field]":     "Date",
-                "sort[0][direction]": "desc",
-                "maxRecords":         limit,
-            },
+            params=params,
             timeout=5,
         )
         resp.raise_for_status()

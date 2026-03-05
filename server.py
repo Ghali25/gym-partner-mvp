@@ -4,7 +4,7 @@ GYM PARTNER — Serveur Flask
 Lance le serveur :
     python server.py
 
-Puis ouvre : http://localhost:5000
+Puis ouvre : http://localhost:8080
 """
 
 import os
@@ -14,23 +14,50 @@ import threading
 from flask import Flask, request, jsonify, send_from_directory
 
 # Import du moteur d'analyse
-from engine import analyze_video
+from engine import analyze_video, ensure_model
 from airtable import log_analysis, get_history
 
 app = Flask(__name__, static_folder='.')
+
+# ── Limite upload (200 Mo) ──────────────────────────
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
+
+# ── Pré-téléchargement du modèle au démarrage ──────
+# Évite un timeout sur la 1ère requête d'analyse (modèle ~30 Mo)
+ensure_model()
 
 # ── CORS manuel (pas besoin de flask-cors) ──────────
 @app.after_request
 def add_cors(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
 # ── Servir l'interface HTML ─────────────────────────
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+
+# ── Fichiers PWA ────────────────────────────────────
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('.', 'manifest.json')
+
+@app.route('/sw.js')
+def sw():
+    resp = send_from_directory('.', 'sw.js')
+    resp.headers['Service-Worker-Allowed'] = '/'
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+@app.route('/icon-192.png')
+def icon192():
+    return send_from_directory('.', 'icon-192.png')
+
+@app.route('/icon-512.png')
+def icon512():
+    return send_from_directory('.', 'icon-512.png')
 
 # ── Endpoint d'analyse vidéo ────────────────────────
 @app.route('/analyze', methods=['POST', 'OPTIONS'])
@@ -48,6 +75,7 @@ def analyze():
         return jsonify({'error': 'Fichier vide'}), 400
 
     exercise = request.form.get('exercise', 'squat')
+    user     = request.form.get('user', 'Anonyme')
 
     # Sauvegarder dans un fichier temporaire
     suffix = os.path.splitext(video_file.filename)[1] or '.mp4'
@@ -61,7 +89,7 @@ def analyze():
 
         # Logger dans Airtable (fire-and-forget, ne bloque pas la réponse)
         if "error" not in result:
-            threading.Thread(target=log_analysis, args=(result,), daemon=True).start()
+            threading.Thread(target=log_analysis, args=(result, user), daemon=True).start()
 
         return jsonify(result)
     except Exception as e:
@@ -86,6 +114,8 @@ def analyze_combined():
 
     if profil_file.filename == '' or face_file.filename == '':
         return jsonify({'error': 'Fichiers vides'}), 400
+
+    user = request.form.get('user', 'Anonyme')
 
     suffix_p = os.path.splitext(profil_file.filename)[1] or '.mp4'
     suffix_f = os.path.splitext(face_file.filename)[1] or '.mp4'
@@ -125,7 +155,7 @@ def analyze_combined():
             'frames_analyzed': result_profil['frames_analyzed'] + result_face['frames_analyzed'],
         }
 
-        threading.Thread(target=log_analysis, args=(combined,), daemon=True).start()
+        threading.Thread(target=log_analysis, args=(combined, user), daemon=True).start()
         return jsonify(combined)
 
     except Exception as e:
@@ -139,13 +169,15 @@ def analyze_combined():
 # ── Historique des analyses ─────────────────────────
 @app.route('/history', methods=['GET'])
 def history():
-    return jsonify(get_history(limit=50))
+    user = request.args.get('user', '')
+    return jsonify(get_history(limit=50, user=user))
 
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
     print("\n" + "="*45)
     print("  🏋️  GYM PARTNER — Serveur démarré")
     print("="*45)
-    print("  → Ouvre : http://localhost:5000")
+    print(f"  → Ouvre : http://localhost:{port}")
     print("="*45 + "\n")
-    app.run(debug=True, port=8080, host='0.0.0.0')
+    app.run(debug=False, port=port, host='0.0.0.0')

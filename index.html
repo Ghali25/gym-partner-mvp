@@ -6,6 +6,14 @@
   <title>GYM PARTNER</title>
   <script>const _t=localStorage.getItem('gympartner-theme');if(_t==='light')document.documentElement.setAttribute('data-theme','light');</script>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Gym Partner" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <style>
     :root {
       --black: #0a0a0a;
@@ -649,6 +657,38 @@
     html[data-theme="light"] .body-diagram ellipse,
     html[data-theme="light"] .body-diagram circle  { fill: #e4e0d8; stroke: #c4c0b8; }
 
+    /* ── Modal pseudo (1er lancement) ── */
+    .pseudo-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+    }
+    .pseudo-card {
+      background: #111; border: 1px solid #222; border-radius: 20px;
+      padding: 44px 48px; text-align: center; max-width: 380px; width: 90%;
+    }
+    .pseudo-emoji { font-size: 40px; margin-bottom: 16px; display: block; }
+    .pseudo-title { font-family: 'Bebas Neue', sans-serif; font-size: 30px;
+                    letter-spacing: 2px; margin-bottom: 10px; }
+    .pseudo-sub   { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+    .pseudo-input {
+      width: 100%; background: #0a0a0a; border: 1.5px solid #2a2a2a; border-radius: 10px;
+      padding: 14px 16px; color: var(--white); font-family: inherit; font-size: 16px;
+      text-align: center; outline: none; transition: border-color 0.2s;
+    }
+    .pseudo-input:focus { border-color: var(--orange); }
+    html[data-theme="light"] .pseudo-card  { background: #fff; border-color: #ddd9d2; }
+    html[data-theme="light"] .pseudo-input { background: #f8f6f1; border-color: #c8c4bc; color: #1a1a1a; }
+
+    /* ── Badge utilisateur header ── */
+    .user-badge {
+      font-size: 11px; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      border: 1px solid #2a2a2a; padding: 5px 10px; border-radius: 20px;
+      transition: border-color 0.2s;
+    }
+    .user-badge:hover { border-color: var(--orange); color: var(--orange); }
+    html[data-theme="light"] .user-badge { border-color: #ddd9d2; }
+
     /* Responsive */
     @media (max-width: 768px) {
       .main { grid-template-columns: 1fr; }
@@ -660,10 +700,23 @@
 </head>
 <body>
 
+  <!-- Modal pseudo — 1er lancement -->
+  <div id="pseudoModal" class="pseudo-modal" style="display:none">
+    <div class="pseudo-card">
+      <span class="pseudo-emoji">🏋️</span>
+      <div class="pseudo-title">Comment on t'appelle ?</div>
+      <p class="pseudo-sub">Ton historique sera sauvegardé sous ce prénom.<br/>Tu pourras le changer à tout moment.</p>
+      <input id="pseudoInput" class="pseudo-input" placeholder="Ex : Ghali" maxlength="30" autocomplete="off" />
+      <button class="analyze-btn" id="pseudoConfirm" style="margin-top:16px;font-size:16px">COMMENCER →</button>
+    </div>
+  </div>
+
   <header>
     <div class="logo">GYM<span>.</span>PARTNER</div>
     <div style="display:flex;align-items:center;gap:10px">
-      <div class="badge">MVP · Squat Analyser</div>
+      <button class="user-badge" id="userBadge" title="Changer de profil">
+        <span>👤</span><span id="userName">—</span>
+      </button>
       <button class="theme-toggle" id="themeToggle">☀</button>
     </div>
   </header>
@@ -900,6 +953,44 @@
       updateThemeIcon();
     });
 
+    // ── Pseudo utilisateur ─────────────────────────
+    let currentUser = localStorage.getItem('gympartner-pseudo') || '';
+
+    function showPseudoModal() {
+      document.getElementById('pseudoModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('pseudoInput').focus(), 100);
+    }
+
+    function applyUser(name) {
+      currentUser = name;
+      localStorage.setItem('gympartner-pseudo', name);
+      document.getElementById('userName').textContent = name;
+      document.getElementById('pseudoModal').style.display = 'none';
+      loadHistory();
+    }
+
+    // Affichage initial
+    if (currentUser) {
+      document.getElementById('userName').textContent = currentUser;
+    } else {
+      showPseudoModal();
+    }
+
+    document.getElementById('pseudoConfirm').addEventListener('click', () => {
+      const val = document.getElementById('pseudoInput').value.trim();
+      if (!val) { document.getElementById('pseudoInput').focus(); return; }
+      applyUser(val);
+    });
+    document.getElementById('pseudoInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('pseudoConfirm').click();
+    });
+
+    // Clic sur le badge → changer de profil
+    document.getElementById('userBadge').addEventListener('click', () => {
+      document.getElementById('pseudoInput').value = currentUser;
+      showPseudoModal();
+    });
+
     // ── State ──────────────────────────────────────
     let videoFile     = null;   // vidéo profil (obligatoire)
     let videoFileFace = null;   // vidéo face   (optionnelle, squat seulement)
@@ -1015,12 +1106,14 @@
           const formData = new FormData();
           formData.append('video_profil', videoFile);
           formData.append('video_face', videoFileFace);
+          formData.append('user', currentUser);
           btnText.textContent = 'ANALYSE COMBINÉE…';
           response = await fetch('/analyze-combined', { method: 'POST', body: formData });
         } else {
           const formData = new FormData();
           formData.append('video', videoFile);
           formData.append('exercise', selectedExercise);
+          formData.append('user', currentUser);
           response = await fetch('/analyze', { method: 'POST', body: formData });
         }
 
@@ -1243,7 +1336,8 @@
     async function loadHistory() {
       const container = document.getElementById('historyList');
       try {
-        const res = await fetch('/history');
+        const userParam = currentUser ? `?user=${encodeURIComponent(currentUser)}` : '';
+        const res = await fetch(`/history${userParam}`);
         const records = await res.json();
         if (!Array.isArray(records) || !records.length) {
           container.innerHTML = '<p class="history-empty">Aucune analyse enregistrée</p>';
@@ -1409,6 +1503,11 @@
         applyColor(['body-hanche'],                    getStatus(angles.hanche,   55, 110));
         applyColor(['body-genou-g', 'body-genou-d'],   getStatus(angles.genou,    70, 100));
       }
+    }
+
+    // ── Service Worker (PWA) ───────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
 
     function hideResults() {
