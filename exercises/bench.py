@@ -44,19 +44,20 @@ class BenchFrameData:
         }
 
 
-def _best_side(lm, w, h):
-    """Retourne (shoulder, elbow, wrist, hip, min_visibility) du côté le plus visible."""
+def _best_side(lm):
+    """Retourne (shoulder, elbow, wrist, hip, min_visibility) du côté le plus visible.
+    Utilise les world landmarks 3D (x, y, z en mètres)."""
     vis = {side: min(lm[i].visibility for i in idxs)
            for side, idxs in SIDES.items()}
     chosen = max(vis, key=vis.get)
     idxs = SIDES[chosen]
-    pts = [[lm[i].x * w, lm[i].y * h] for i in idxs]
+    pts = [[lm[i].x, lm[i].y, lm[i].z] for i in idxs]
     # pts[0]=shoulder, pts[1]=elbow, pts[2]=wrist, pts[3]=hip
     return pts[0], pts[1], pts[2], pts[3], vis[chosen]
 
 
-def build_frame_data(lm, w: int, h: int) -> Optional[BenchFrameData]:
-    shoulder, elbow, wrist, hip, vis = _best_side(lm, w, h)
+def build_frame_data(lm) -> Optional[BenchFrameData]:
+    shoulder, elbow, wrist, hip, vis = _best_side(lm)
     if vis < MIN_VIS_BENCH:
         return None
 

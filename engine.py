@@ -59,13 +59,16 @@ def calculate_angle(a, b, c) -> float:
 
 
 def calculate_back_angle(hip, shoulder) -> float:
-    """Inclinaison du dos par rapport à la verticale.
-    0° = dos droit, augmente avec le penchement vers l'avant."""
-    spine = np.array([shoulder[0] - hip[0], shoulder[1] - hip[1]], dtype=float)
+    """Inclinaison du dos par rapport à la verticale en 3D (world landmarks).
+    0° = dos parfaitement droit, augmente avec le penchement vers l'avant.
+    En world coords MediaPipe, Y pointe vers le haut."""
+    spine = np.array([shoulder[0] - hip[0],
+                      shoulder[1] - hip[1],
+                      shoulder[2] - hip[2] if len(shoulder) > 2 else 0.0], dtype=float)
     norm = np.linalg.norm(spine)
     if norm < 1e-6:
         return 0.0
-    vertical_up = np.array([0.0, -1.0])
+    vertical_up = np.array([0.0, 1.0, 0.0])   # Y est vers le haut en world coords
     cosine = np.clip(np.dot(spine / norm, vertical_up), -1.0, 1.0)
     return round(float(np.degrees(np.arccos(cosine))), 1)
 
@@ -163,10 +166,17 @@ def analyze_video(video_path: str, exercise: str = 'squat') -> dict:
             if not result.pose_landmarks:
                 continue
 
-            lm = result.pose_landmarks[0]
             analyzed += 1
 
-            frame = build_frame_data(lm, w, h)
+            # ── Landmarks 3D (world coords en mètres, origine = centre des hanches)
+            # Préférés aux 2D car insensibles à l'angle et à la distance de caméra.
+            # Fallback sur les 2D normalisés si indisponibles (cas rare).
+            if result.pose_world_landmarks and len(result.pose_world_landmarks) > 0:
+                lm = result.pose_world_landmarks[0]
+                frame = build_frame_data(lm)
+            else:
+                lm = result.pose_landmarks[0]
+                frame = build_frame_data(lm)
             if frame is not None:
                 frames.append(frame)
 

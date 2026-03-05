@@ -42,22 +42,22 @@ class FaceSquatFrameData:
         }
 
 
-def build_frame_data(lm, w: int, h: int) -> Optional[FaceSquatFrameData]:
+def build_frame_data(lm) -> Optional[FaceSquatFrameData]:
     # Les deux côtés doivent être visibles
     vis_l = min(lm[i].visibility for i in LEFT_IDS)
     vis_r = min(lm[i].visibility for i in RIGHT_IDS)
     if vis_l < MIN_VIS or vis_r < MIN_VIS:
         return None
 
-    # Points en pixels
-    left_hip    = [lm[23].x * w, lm[23].y * h]
-    left_knee   = [lm[25].x * w, lm[25].y * h]
-    left_ankle  = [lm[27].x * w, lm[27].y * h]
-    right_hip   = [lm[24].x * w, lm[24].y * h]
-    right_knee  = [lm[26].x * w, lm[26].y * h]
-    right_ankle = [lm[28].x * w, lm[28].y * h]
+    # Points 3D en mètres (world landmarks — origine = centre des hanches)
+    left_hip    = [lm[23].x, lm[23].y, lm[23].z]
+    left_knee   = [lm[25].x, lm[25].y, lm[25].z]
+    left_ankle  = [lm[27].x, lm[27].y, lm[27].z]
+    right_hip   = [lm[24].x, lm[24].y, lm[24].z]
+    right_knee  = [lm[26].x, lm[26].y, lm[26].z]
+    right_ankle = [lm[28].x, lm[28].y, lm[28].z]
 
-    # Angle valgus : hip → knee → ankle dans le plan frontal
+    # Angle valgus 3D : hip → knee → ankle (capte le valgus dans tous les plans)
     valgus_g = calculate_angle(left_hip,  left_knee,  left_ankle)
     valgus_d = calculate_angle(right_hip, right_knee, right_ankle)
 
@@ -68,7 +68,7 @@ def build_frame_data(lm, w: int, h: int) -> Optional[FaceSquatFrameData]:
 
     asymetrie = round(abs(valgus_g - valgus_d), 1)
 
-    # Largeur de stance : ratio chevilles / hanches (coords normalisées)
+    # Largeur de stance : ratio chevilles / hanches sur l'axe X (latéral en world coords)
     hip_width   = abs(lm[24].x - lm[23].x)
     ankle_width = abs(lm[28].x - lm[27].x)
     largeur = round(ankle_width / hip_width, 2) if hip_width > 0.01 else 1.0
